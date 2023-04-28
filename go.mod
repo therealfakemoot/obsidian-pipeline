@@ -1,4 +1,4 @@
-module obspipeline
+module code.ndumas.com/ndumas/obsidian-pipeline
 
 go 1.19
 
