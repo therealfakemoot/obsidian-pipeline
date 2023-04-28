@@ -24,7 +24,7 @@ func NewAttachmentMover() *AttachmentMover {
 
 type AttachmentMover struct {
 	Source, Target          string
-	Attachments             map[string]bool
+	Attachments             map[string]string
 	Notes, Posts            []string
 	L                       *zap.Logger
 	BlogDir, AttachmentsDir string
@@ -36,17 +36,17 @@ func (am *AttachmentMover) Walk() error {
 
 	err := fs.WalkDir(notesRoot, ".", am.findAttachments)
 	if err != nil {
-		return fmt.Errorf("error scanning for attachments: %q", err)
+		return fmt.Errorf("error scanning for attachments: %w", err)
 	}
 
 	err = fs.WalkDir(notesRoot, ".", am.findNotes)
 	if err != nil {
-		return fmt.Errorf("error scanning vault for posts: %q", err)
+		return fmt.Errorf("error scanning vault for posts: %w", err)
 	}
 
 	err = fs.WalkDir(blogRoot, ".", am.findPosts)
 	if err != nil {
-		return fmt.Errorf("error scanning blog for posts: %q", err)
+		return fmt.Errorf("error scanning blog for posts: %w", err)
 	}
 	return nil
 }
@@ -80,7 +80,11 @@ func (am *AttachmentMover) findAttachments(path string, d fs.DirEntry, err error
 
 	if strings.Contains(path, am.AttachmentsDir) {
 		walkLogger.Info("found attachment file, adding to index")
-		am.Attachments[path] = true
+		absPath, err := filepath.Abs(filepath.Join(am.Source, path))
+		if err != nil {
+			return fmt.Errorf("error generating absolute path for attachment %q: %w", err)
+		}
+		am.Attachments[filename] = absPath
 	}
 	return nil
 }
@@ -139,7 +143,7 @@ func extractAttachments(post string, l *zap.Logger) ([]string, error) {
 	attachments := make([]string, 0)
 	postBody, err := ioutil.ReadFile(post)
 	if err != nil {
-		return attachments, fmt.Errorf("error opening post to scan for attachment links: %q", err)
+		return attachments, fmt.Errorf("error opening post to scan for attachment links: %w", err)
 	}
 
 	for _, att := range pat.FindAllSubmatch(postBody, -1) {

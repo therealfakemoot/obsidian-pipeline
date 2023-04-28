@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 
 	"go.uber.org/zap"
 
@@ -42,4 +43,6 @@ func main() {
 	if err != nil {
 		am.L.Fatal("error moving notes", zap.Error(err))
 	}
+
+	fmt.Printf("%#+v\n", am.Attachments)
 }
