@@ -59,10 +59,10 @@ func (am *AttachmentMover) findNotes(path string, d fs.DirEntry, err error) erro
 	if d.IsDir() {
 		return nil
 	}
-	walkLogger := am.L.Named("FindNotes")
+	walkLogger := am.L.Named("FindNotes").With(zap.String("path", path))
 
 	if strings.HasSuffix(path, ".md") && strings.Contains(path, am.BlogDir) {
-		walkLogger.Info("found blog post to publish, adding to index", zap.String("path", path))
+		walkLogger.Info("found blog post to publish, adding to index")
 		am.Notes = append(am.Notes, path)
 	}
 	return nil
@@ -76,10 +76,10 @@ func (am *AttachmentMover) findAttachments(path string, d fs.DirEntry, err error
 	if d.IsDir() {
 		return nil
 	}
-	walkLogger := am.L.Named("FindAttachments")
+	walkLogger := am.L.Named("FindAttachments").With(zap.String("path", path))
 
 	if strings.Contains(path, am.AttachmentsDir) {
-		walkLogger.Info("found attachment file, adding to index", zap.String("path", path))
+		walkLogger.Info("found attachment file, adding to index")
 		am.Attachments[path] = true
 	}
 	return nil
@@ -93,10 +93,10 @@ func (am *AttachmentMover) findPosts(path string, d fs.DirEntry, err error) erro
 	if d.IsDir() {
 		return nil
 	}
-	walkLogger := am.L.Named("FindPosts")
+	walkLogger := am.L.Named("FindPosts").With(zap.String("path", path))
 
 	if strings.HasSuffix(path, "index.md") {
-		walkLogger.Info("found index.md, adding to index", zap.String("path", path))
+		walkLogger.Info("found index.md, adding to index")
 		am.Posts = append(am.Posts, path)
 	}
 	return nil
