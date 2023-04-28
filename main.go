@@ -29,10 +29,27 @@ type AttachmentMover struct {
 }
 
 func (am *AttachmentMover) Walk() error {
+	notesRoot := os.DirFS(am.Source)
+	blogRoot := os.DirFS(am.Target)
+
+	err := fs.WalkDir(notesRoot, ".", am.findAttachments)
+	if err != nil {
+		return fmt.Errorf("error scanning for attachments: %q", err)
+	}
+
+	err = fs.WalkDir(notesRoot, ".", am.findNotes)
+	if err != nil {
+		return fmt.Errorf("error scanning vault for posts: %q", err)
+	}
+
+	err = fs.WalkDir(blogRoot, ".", am.findPosts)
+	if err != nil {
+		return fmt.Errorf("error scanning blog for posts: %q", err)
+	}
 	return nil
 }
 
-func (am *AttachmentMover) walk(path string, d fs.DirEntry, err error) error {
+func (am *AttachmentMover) findNotes(path string, d fs.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
@@ -40,23 +57,51 @@ func (am *AttachmentMover) walk(path string, d fs.DirEntry, err error) error {
 	if d.IsDir() {
 		return nil
 	}
-	walkLogger := am.L.Named("Walk()")
+	walkLogger := am.L.Named("FindNotes")
 
-	walkLogger.Info("scanning for relevance", zap.String("path", path))
-	if strings.HasSuffix(path, "index.md") {
-		walkLogger.Info("found index.md, adding to index", zap.String("path", path))
-		am.Posts = append(am.Posts, path)
-	}
-
-	if !strings.HasSuffix(path, ".md") && strings.Contains(path, "attachments") {
-		walkLogger.Info("found  attachment file, adding to index", zap.String("path", path))
+	if strings.HasSuffix(path, ".md") && strings.Contains(path, "blog/published") {
+		walkLogger.Info("found blog post to publish, adding to index", zap.String("path", path))
 		am.Attachments[path] = true
 	}
 	return nil
 }
 
+func (am *AttachmentMover) findAttachments(path string, d fs.DirEntry, err error) error {
+	if err != nil {
+		return err
+	}
+
+	if d.IsDir() {
+		return nil
+	}
+	walkLogger := am.L.Named("FindAttachments")
+
+	if strings.Contains(path, "attachments") {
+		walkLogger.Info("found attachment file, adding to index", zap.String("path", path))
+		am.Attachments[path] = true
+	}
+	return nil
+}
+
+func (am *AttachmentMover) findPosts(path string, d fs.DirEntry, err error) error {
+	if err != nil {
+		return err
+	}
+
+	if d.IsDir() {
+		return nil
+	}
+	walkLogger := am.L.Named("FindPosts")
+
+	if strings.HasSuffix(path, "index.md") {
+		walkLogger.Info("found index.md, adding to index", zap.String("path", path))
+		am.Posts = append(am.Posts, path)
+	}
+	return nil
+}
+
 func (am *AttachmentMover) Move() error {
-	moveLogger := am.L.Named("Move()")
+	moveLogger := am.L.Named("Move")
 	moveLogger.Info("scanning posts", zap.Strings("posts", am.Posts))
 	for _, post := range am.Posts {
 		// log.Printf("scanning %q for attachment links", post)
@@ -85,6 +130,7 @@ func extractAttachments(fn string) ([]string, error) {
 
 func main() {
 	am := NewAttachmentMover()
+	defer am.L.Sync()
 
 	flag.StringVar(&am.Source, "source", "", "source directory containing your vault")
 	flag.StringVar(&am.Target, "target", "", "target directory containing your hugo site")
@@ -97,11 +143,11 @@ func main() {
 
 	err := am.Walk()
 	if err != nil {
-		// log.Fatalf("error walking blog dir to gather file names: %s\n", err)
+		am.L.Fatal("error walking blog or notes dir to gather file names", zap.Error(err))
 	}
 
 	err = am.Move()
 	if err != nil {
-		// log.Fatalf("error walking blog dir to gather file names: %s\n", err)
+		am.L.Fatal("error moving notes", zap.Error(err))
 	}
 }
