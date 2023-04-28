@@ -131,7 +131,7 @@ func moveAttachment(post, attachment string, l *zap.Logger) error {
 
 func extractAttachments(post string, l *zap.Logger) ([]string, error) {
 
-	l.Info("extracting attachment",
+	l.Info("scanning note",
 		zap.String("post", post),
 	)
 
