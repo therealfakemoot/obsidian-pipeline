@@ -106,24 +106,31 @@ func (am *AttachmentMover) Move() error {
 	moveLogger.Info("scanning posts", zap.Strings("posts", am.Posts))
 	for _, post := range am.Posts {
 		// log.Printf("scanning %q for attachment links", post)
-		linkedAttachments, err := extractAttachments(post)
+		linkedAttachments, err := extractAttachments(post, am.L.Named("extractAttachments"))
 		if err != nil {
 			return fmt.Errorf("could not extract attachment links from %q: %w", post, err)
 		}
 		for _, attachment := range linkedAttachments {
-			moveAttachment(post, attachment)
+			moveAttachment(post, attachment, am.L.Named("moveAttachment"))
 		}
 	}
 
 	return nil
 }
 
-func moveAttachment(post, attachment string) error {
+func moveAttachment(post, attachment string, l *zap.Logger) error {
+	l.Info("moving attachment",
+		zap.String("post", post),
+		zap.String("attachment", attachment),
+	)
 
 	return nil
 }
 
-func extractAttachments(fn string) ([]string, error) {
+func extractAttachments(post string, l *zap.Logger) ([]string, error) {
+	l.Info("extracting attachment",
+		zap.String("post", post),
+	)
 	attachments := make([]string, 0)
 
 	return attachments, nil
