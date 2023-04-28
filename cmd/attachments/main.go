@@ -33,10 +33,6 @@ func main() {
 		am.L.Fatal("please provide -blog")
 	}
 
-	if am.Source == "" || am.Target == "" {
-		am.L.Fatal("flags not provided")
-	}
-
 	err := am.Walk()
 	if err != nil {
 		am.L.Fatal("error walking blog or notes dir to gather file names", zap.Error(err))
