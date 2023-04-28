@@ -16,7 +16,7 @@ func NewAttachmentMover() *AttachmentMover {
 	var am AttachmentMover
 	l, _ := zap.NewProduction()
 	am.L = l
-	am.Attachments = make(map[string]bool)
+	am.Attachments = make(map[string]string)
 	am.Posts = make([]string, 0)
 
 	return &am
@@ -82,9 +82,9 @@ func (am *AttachmentMover) findAttachments(path string, d fs.DirEntry, err error
 		walkLogger.Info("found attachment file, adding to index")
 		absPath, err := filepath.Abs(filepath.Join(am.Source, path))
 		if err != nil {
-			return fmt.Errorf("error generating absolute path for attachment %q: %w", err)
+			return fmt.Errorf("error generating absolute path for attachment %q: %w", path, err)
 		}
-		am.Attachments[filename] = absPath
+		am.Attachments[filepath.Base(absPath)] = absPath
 	}
 	return nil
 }
