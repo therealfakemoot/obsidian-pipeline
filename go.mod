@@ -1,4 +1,4 @@
-module testo
+module obspipeline
 
 go 1.19
 

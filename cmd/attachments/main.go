@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	am := NewAttachmentMover()
+	am := obspipeline.NewAttachmentMover()
 	defer am.L.Sync()
 
 	flag.StringVar(&am.Source, "source", "", "source directory containing your vault")
