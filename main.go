@@ -22,10 +22,11 @@ func NewAttachmentMover() *AttachmentMover {
 }
 
 type AttachmentMover struct {
-	Source, Target string
-	Attachments    map[string]bool
-	Posts          []string
-	L              *zap.Logger
+	Source, Target          string
+	Attachments             map[string]bool
+	Posts                   []string
+	L                       *zap.Logger
+	BlogDir, AttachmentsDir string
 }
 
 func (am *AttachmentMover) Walk() error {
@@ -59,7 +60,7 @@ func (am *AttachmentMover) findNotes(path string, d fs.DirEntry, err error) erro
 	}
 	walkLogger := am.L.Named("FindNotes")
 
-	if strings.HasSuffix(path, ".md") && strings.Contains(path, "blog/published") {
+	if strings.HasSuffix(path, ".md") && strings.Contains(path, am.BlogDir) {
 		walkLogger.Info("found blog post to publish, adding to index", zap.String("path", path))
 		am.Attachments[path] = true
 	}
@@ -76,7 +77,7 @@ func (am *AttachmentMover) findAttachments(path string, d fs.DirEntry, err error
 	}
 	walkLogger := am.L.Named("FindAttachments")
 
-	if strings.Contains(path, "attachments") {
+	if strings.Contains(path, am.AttachmentsDir) {
 		walkLogger.Info("found attachment file, adding to index", zap.String("path", path))
 		am.Attachments[path] = true
 	}
@@ -134,8 +135,24 @@ func main() {
 
 	flag.StringVar(&am.Source, "source", "", "source directory containing your vault")
 	flag.StringVar(&am.Target, "target", "", "target directory containing your hugo site")
+	flag.StringVar(&am.AttachmentsDir, "attachments", "", "directory containing your vault's attachments")
+	flag.StringVar(&am.BlogDir, "blog", "", "vault directory containing blog posts to-be-published")
 
 	flag.Parse()
+
+	switch {
+	case am.Source == "":
+		am.L.Fatal("please provide -source")
+		fallthrough
+	case am.Target == "":
+		am.L.Fatal("please provide -target")
+		fallthrough
+	case am.AttachmentsDir == "":
+		am.L.Fatal("please provide -attachments")
+		fallthrough
+	case am.BlogDir == "":
+		am.L.Fatal("please provide -blog")
+	}
 
 	if am.Source == "" || am.Target == "" {
 		am.L.Fatal("flags not provided")
