@@ -142,8 +142,8 @@ func extractAttachments(post string, l *zap.Logger) ([]string, error) {
 		return attachments, fmt.Errorf("error opening post to scan for attachment links: %q", err)
 	}
 
-	for _, att := range pat.FindAll(postBody, -1) {
-		l.Info("found attachment", zap.String("filename", string(att)))
+	for _, att := range pat.FindAllSubmatch(postBody, -1) {
+		l.Info("found attachment", zap.String("filename", string(att[1])))
 
 	}
 
