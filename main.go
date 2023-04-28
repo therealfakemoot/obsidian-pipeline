@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"io/fs"
+	"io/ioutil"
 	"os"
-	// "path/filepath"
+	"path/filepath"
+	"regexp"
 	"strings"
 
 	"go.uber.org/zap"
@@ -24,7 +26,7 @@ func NewAttachmentMover() *AttachmentMover {
 type AttachmentMover struct {
 	Source, Target          string
 	Attachments             map[string]bool
-	Posts                   []string
+	Notes, Posts            []string
 	L                       *zap.Logger
 	BlogDir, AttachmentsDir string
 }
@@ -62,7 +64,7 @@ func (am *AttachmentMover) findNotes(path string, d fs.DirEntry, err error) erro
 
 	if strings.HasSuffix(path, ".md") && strings.Contains(path, am.BlogDir) {
 		walkLogger.Info("found blog post to publish, adding to index", zap.String("path", path))
-		am.Attachments[path] = true
+		am.Notes = append(am.Notes, path)
 	}
 	return nil
 }
@@ -104,9 +106,9 @@ func (am *AttachmentMover) findPosts(path string, d fs.DirEntry, err error) erro
 func (am *AttachmentMover) Move() error {
 	moveLogger := am.L.Named("Move")
 	moveLogger.Info("scanning posts", zap.Strings("posts", am.Posts))
-	for _, post := range am.Posts {
+	for _, post := range am.Notes {
 		// log.Printf("scanning %q for attachment links", post)
-		linkedAttachments, err := extractAttachments(post, am.L.Named("extractAttachments"))
+		linkedAttachments, err := extractAttachments(filepath.Join(am.Source, post), am.L.Named("extractAttachments"))
 		if err != nil {
 			return fmt.Errorf("could not extract attachment links from %q: %w", post, err)
 		}
@@ -128,10 +130,23 @@ func moveAttachment(post, attachment string, l *zap.Logger) error {
 }
 
 func extractAttachments(post string, l *zap.Logger) ([]string, error) {
+
 	l.Info("extracting attachment",
 		zap.String("post", post),
 	)
+
+	pat := regexp.MustCompile(`\[\[Resources\/attachments\/(.*)?\]\]`)
+
 	attachments := make([]string, 0)
+	postBody, err := ioutil.ReadFile(post)
+	if err != nil {
+		return attachments, fmt.Errorf("error opening post to scan for attachment links: %q", err)
+	}
+
+	for _, att := range pat.FindAll(postBody, -1) {
+		l.Info("found attachment", zap.String("filename", string(att)))
+
+	}
 
 	return attachments, nil
 }
