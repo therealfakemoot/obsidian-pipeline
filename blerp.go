@@ -12,29 +12,6 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewPipeline(dev bool) *Pipeline {
-	var p Pipeline
-	var l *zap.Logger
-
-	l, _ = zap.NewProduction()
-	if dev {
-		l, _ = zap.NewDevelopment()
-	}
-	p.L = l
-	p.Attachments = make(map[string]string)
-	p.Posts = make([]string, 0)
-
-	return &p
-}
-
-type Pipeline struct {
-	Source, Target          string
-	Attachments             map[string]string
-	Notes, Posts            []string
-	L                       *zap.Logger
-	BlogDir, AttachmentsDir string
-}
-
 func (p *Pipeline) Walk() error {
 	notesRoot := os.DirFS(p.Source)
 	blogRoot := os.DirFS(p.Target)
@@ -70,10 +47,6 @@ func (p *Pipeline) findNotes(path string, d fs.DirEntry, err error) error {
 		walkLogger.Info("found blog post to publish, adding to index")
 		p.Notes = append(p.Notes, path)
 	}
-	return nil
-}
-
-func (p *Pipeline) FindAttachments() error {
 	return nil
 }
 
@@ -124,7 +97,7 @@ func (p *Pipeline) Move() error {
 	moveLogger.Info("scanning posts", zap.Strings("posts", p.Posts))
 	for _, post := range p.Notes {
 		// log.Printf("scanning %q for attachment links", post)
-		linkedAttachments, err := extractAttachments(filepath.Join(p.Source, post), p.L.Named("extractAttachments"))
+		linkedAttachments, err := extractAttachments(filepath.Join(p.Source, post))
 		if err != nil {
 			return fmt.Errorf("could not extract attachment links from %q: %w", post, err)
 		}
@@ -149,11 +122,7 @@ func moveAttachment(post, attachment string, l *zap.Logger) error {
 	return nil
 }
 
-func extractAttachments(post string, l *zap.Logger) ([]string, error) {
-
-	l.Info("scanning note",
-		zap.String("post", post),
-	)
+func extractAttachments(post string) ([]string, error) {
 
 	pat := regexp.MustCompile(`\[\[Resources\/attachments\/(.*)?\]\]`)
 
@@ -165,7 +134,6 @@ func extractAttachments(post string, l *zap.Logger) ([]string, error) {
 
 	for _, att := range pat.FindAllSubmatch(postBody, -1) {
 		filename := string(att[1])
-		l.Info("found attachment", zap.String("filename", filename))
 		attachments = append(attachments, filename)
 
 	}
