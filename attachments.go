@@ -12,17 +12,22 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewAttachmentMover() *AttachmentMover {
-	var am AttachmentMover
-	l, _ := zap.NewProduction()
-	am.L = l
-	am.Attachments = make(map[string]string)
-	am.Posts = make([]string, 0)
+func NewPipeline(dev bool) *Pipeline {
+	var p Pipeline
+	var l *zap.Logger
 
-	return &am
+	l, _ = zap.NewProduction()
+	if dev {
+		l, _ = zap.NewDevelopment()
+	}
+	p.L = l
+	p.Attachments = make(map[string]string)
+	p.Posts = make([]string, 0)
+
+	return &p
 }
 
-type AttachmentMover struct {
+type Pipeline struct {
 	Source, Target          string
 	Attachments             map[string]string
 	Notes, Posts            []string
@@ -30,28 +35,28 @@ type AttachmentMover struct {
 	BlogDir, AttachmentsDir string
 }
 
-func (am *AttachmentMover) Walk() error {
-	notesRoot := os.DirFS(am.Source)
-	blogRoot := os.DirFS(am.Target)
+func (p *Pipeline) Walk() error {
+	notesRoot := os.DirFS(p.Source)
+	blogRoot := os.DirFS(p.Target)
 
-	err := fs.WalkDir(notesRoot, ".", am.findAttachments)
+	err := fs.WalkDir(notesRoot, ".", p.findAttachments)
 	if err != nil {
 		return fmt.Errorf("error scanning for attachments: %w", err)
 	}
 
-	err = fs.WalkDir(notesRoot, ".", am.findNotes)
+	err = fs.WalkDir(notesRoot, ".", p.findNotes)
 	if err != nil {
 		return fmt.Errorf("error scanning vault for posts: %w", err)
 	}
 
-	err = fs.WalkDir(blogRoot, ".", am.findPosts)
+	err = fs.WalkDir(blogRoot, ".", p.findPosts)
 	if err != nil {
 		return fmt.Errorf("error scanning blog for posts: %w", err)
 	}
 	return nil
 }
 
-func (am *AttachmentMover) findNotes(path string, d fs.DirEntry, err error) error {
+func (p *Pipeline) findNotes(path string, d fs.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
@@ -59,16 +64,20 @@ func (am *AttachmentMover) findNotes(path string, d fs.DirEntry, err error) erro
 	if d.IsDir() {
 		return nil
 	}
-	walkLogger := am.L.Named("FindNotes").With(zap.String("path", path))
+	walkLogger := p.L.Named("FindNotes").With(zap.String("path", path))
 
-	if strings.HasSuffix(path, ".md") && strings.Contains(path, am.BlogDir) {
+	if strings.HasSuffix(path, ".md") && strings.Contains(path, p.BlogDir) {
 		walkLogger.Info("found blog post to publish, adding to index")
-		am.Notes = append(am.Notes, path)
+		p.Notes = append(p.Notes, path)
 	}
 	return nil
 }
 
-func (am *AttachmentMover) findAttachments(path string, d fs.DirEntry, err error) error {
+func (p *Pipeline) FindAttachments() error {
+	return nil
+}
+
+func (p *Pipeline) findAttachments(path string, d fs.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
@@ -76,20 +85,24 @@ func (am *AttachmentMover) findAttachments(path string, d fs.DirEntry, err error
 	if d.IsDir() {
 		return nil
 	}
-	walkLogger := am.L.Named("FindAttachments").With(zap.String("path", path))
+	walkLogger := p.L.Named("FindAttachments").With(zap.String("path", path))
 
-	if strings.Contains(path, am.AttachmentsDir) {
+	if strings.Contains(path, p.AttachmentsDir) {
 		walkLogger.Info("found attachment file, adding to index")
-		absPath, err := filepath.Abs(filepath.Join(am.Source, path))
+		absPath, err := filepath.Abs(filepath.Join(p.Source, path))
 		if err != nil {
 			return fmt.Errorf("error generating absolute path for attachment %q: %w", path, err)
 		}
-		am.Attachments[filepath.Base(absPath)] = absPath
+		walkLogger.Info("adding Attachment",
+			zap.String("key", filepath.Base(absPath)),
+			zap.String("value", absPath),
+		)
+		p.Attachments[filepath.Base(absPath)] = absPath
 	}
 	return nil
 }
 
-func (am *AttachmentMover) findPosts(path string, d fs.DirEntry, err error) error {
+func (p *Pipeline) findPosts(path string, d fs.DirEntry, err error) error {
 	if err != nil {
 		return err
 	}
@@ -97,26 +110,30 @@ func (am *AttachmentMover) findPosts(path string, d fs.DirEntry, err error) erro
 	if d.IsDir() {
 		return nil
 	}
-	walkLogger := am.L.Named("FindPosts").With(zap.String("path", path))
+	walkLogger := p.L.Named("FindPosts").With(zap.String("path", path))
 
 	if strings.HasSuffix(path, "index.md") {
 		walkLogger.Info("found index.md, adding to index")
-		am.Posts = append(am.Posts, path)
+		p.Posts = append(p.Posts, path)
 	}
 	return nil
 }
 
-func (am *AttachmentMover) Move() error {
-	moveLogger := am.L.Named("Move")
-	moveLogger.Info("scanning posts", zap.Strings("posts", am.Posts))
-	for _, post := range am.Notes {
+func (p *Pipeline) Move() error {
+	moveLogger := p.L.Named("Move")
+	moveLogger.Info("scanning posts", zap.Strings("posts", p.Posts))
+	for _, post := range p.Notes {
 		// log.Printf("scanning %q for attachment links", post)
-		linkedAttachments, err := extractAttachments(filepath.Join(am.Source, post), am.L.Named("extractAttachments"))
+		linkedAttachments, err := extractAttachments(filepath.Join(p.Source, post), p.L.Named("extractAttachments"))
 		if err != nil {
 			return fmt.Errorf("could not extract attachment links from %q: %w", post, err)
 		}
 		for _, attachment := range linkedAttachments {
-			moveAttachment(post, attachment, am.L.Named("moveAttachment"))
+			att, ok := p.Attachments[attachment]
+			if !ok {
+				return fmt.Errorf("Attachment is linked by post %q but doesn't exist in attachments directory %q", post, p.AttachmentsDir)
+			}
+			moveAttachment(post, att, p.L.Named("moveAttachment"))
 		}
 	}
 
@@ -147,7 +164,9 @@ func extractAttachments(post string, l *zap.Logger) ([]string, error) {
 	}
 
 	for _, att := range pat.FindAllSubmatch(postBody, -1) {
-		l.Info("found attachment", zap.String("filename", string(att[1])))
+		filename := string(att[1])
+		l.Info("found attachment", zap.String("filename", filename))
+		attachments = append(attachments, filename)
 
 	}
 

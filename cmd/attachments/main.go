@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	// "fmt"
 
 	"go.uber.org/zap"
 
@@ -10,15 +10,25 @@ import (
 )
 
 func main() {
-	am := obspipeline.NewAttachmentMover()
-	defer am.L.Sync()
+	var (
+		source, target, attachmentsDir, blogDir string
+		dev                                     bool
+	)
 
-	flag.StringVar(&am.Source, "source", "", "source directory containing your vault")
-	flag.StringVar(&am.Target, "target", "", "target directory containing your hugo site")
-	flag.StringVar(&am.AttachmentsDir, "attachments", "", "directory containing your vault's attachments")
-	flag.StringVar(&am.BlogDir, "blog", "", "vault directory containing blog posts to-be-published")
+	flag.BoolVar(&dev, "dev", false, "developer mode")
+	flag.StringVar(&source, "source", "", "source directory containing your vault")
+	flag.StringVar(&target, "target", "", "target directory containing your hugo site")
+	flag.StringVar(&attachmentsDir, "attachments", "", "directory containing your vault's attachments")
+	flag.StringVar(&blogDir, "blog", "", "vault directory containing blog posts to-be-published")
 
 	flag.Parse()
+	am := obspipeline.NewPipeline(dev)
+	defer am.L.Sync()
+
+	am.Source = source
+	am.Target = target
+	am.AttachmentsDir = attachmentsDir
+	am.BlogDir = blogDir
 
 	switch {
 	case am.Source == "":
@@ -44,5 +54,5 @@ func main() {
 		am.L.Fatal("error moving notes", zap.Error(err))
 	}
 
-	fmt.Printf("%#+v\n", am.Attachments)
+	// fmt.Printf("%#+v\n", am.Attachments)
 }
