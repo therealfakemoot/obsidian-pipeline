@@ -98,7 +98,4 @@ var SanitizeLinks = Node{
 	},
 }
 
-var Terminate = Node{
-	State:       "Terminate",
-	Transitions: map[Event]*Transition{},
-}
+var Terminate Node
