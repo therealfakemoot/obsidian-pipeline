@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"strings"
+	"sync"
 
 	"go.uber.org/zap"
 
@@ -42,7 +43,10 @@ func main() {
 		return nil
 	}
 
+	var wg sync.WaitGroup
 	go func() {
+		defer wg.Done()
+		wg.Add(1)
 		for fn := range fileNames {
 			if !strings.HasSuffix(fn, ".md") {
 				continue
@@ -61,5 +65,7 @@ func main() {
 	if err != nil {
 		l.Fatal("error walking for files", zap.Error(err))
 	}
+	close(fileNames)
 
+	wg.Wait()
 }
