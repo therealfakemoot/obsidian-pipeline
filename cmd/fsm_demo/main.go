@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"flag"
+	"io/fs"
+	"os"
+	"strings"
 
 	"go.uber.org/zap"
 
@@ -24,12 +27,39 @@ func main() {
 
 	flag.Parse()
 
-	m := fsm.NewStateMachine(&fsm.NoteFound)
-	note := "bleep"
-	ctx := context.WithValue(context.Background(), "note", note)
-	_, err := m.Transition(ctx, "CopyPost")
-	if err != nil {
-		l.Fatal("could not transition from NoteFound to CopyPost", zap.Error(err))
+	fileNames := make(chan string)
 
+	walkFunc := func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+		fileNames <- path
+
+		return nil
 	}
+
+	go func() {
+		for fn := range fileNames {
+			if !strings.HasSuffix(fn, ".md") {
+				continue
+			}
+			m := fsm.NewStateMachine(&fsm.NoteFound)
+			ctx := context.WithValue(context.Background(), "note", fn)
+			_, err := m.Transition(ctx, "CopyPost")
+			if err != nil {
+				l.Fatal("could not transition from NoteFound to CopyPost", zap.Error(err))
+			}
+		}
+	}()
+
+	root := os.DirFS(source)
+	err := fs.WalkDir(root, ".", walkFunc)
+	if err != nil {
+		l.Fatal("error walking for files", zap.Error(err))
+	}
+
 }

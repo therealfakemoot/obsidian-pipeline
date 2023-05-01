@@ -34,7 +34,11 @@ var NoteFound = Node{
 		"CopyPost": &Transition{
 			Node: &CopyPost,
 			Action: func(ctx context.Context) error {
-				l = l.Named("NoteFound")
+				//TODO: Here's the place to do validation
+				// I had an idea about parsing frontmatter into go structs,
+				// and then writing them out to a NullWriter via protobuf encoding.
+				// this would do schema checking which is nice
+				l := l.Named("NoteFound")
 				note := ctx.Value("note").(string)
 				l.Info("creating post from note", zap.String("filename", note))
 				// scan for attachments here
