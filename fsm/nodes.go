@@ -1,7 +1,13 @@
-package obspipeline
+package fsm
 
 import (
 	"context"
+
+	"go.uber.org/zap"
+)
+
+var (
+	l, _ = zap.NewProduction()
 )
 
 var CopyPost = Node{
@@ -28,6 +34,9 @@ var NoteFound = Node{
 		"CopyPost": &Transition{
 			Node: &CopyPost,
 			Action: func(ctx context.Context) error {
+				l = l.Named("NoteFound")
+				note := ctx.Value("note").(string)
+				l.Info("creating post from note", zap.String("filename", note))
 				// scan for attachments here
 				// if len() attachments > 0
 				//
@@ -86,6 +95,6 @@ var SanitizeLinks = Node{
 }
 
 var Terminate = Node{
-	State:       "SanitizeLinks",
+	State:       "Terminate",
 	Transitions: map[Event]*Transition{},
 }

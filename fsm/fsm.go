@@ -1,4 +1,4 @@
-package obspipeline
+package fsm
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 )
 
 type State string
+
 type Event string
 
 type Action func(ctx context.Context) error
@@ -56,4 +57,15 @@ func (m *StateMachine) Transition(ctx context.Context, event Event) (*Node, erro
 	m.CurrentNode = node
 
 	return m.CurrentNode, nil
+}
+
+func NewStateMachine(initialNode *Node) *StateMachine {
+	if initialNode == nil {
+		return &StateMachine{}
+	}
+
+	return &StateMachine{
+		initialNode: initialNode,
+		CurrentNode: initialNode,
+	}
 }
