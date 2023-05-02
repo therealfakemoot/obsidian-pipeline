@@ -2,8 +2,12 @@ package fsm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 )
+
+var NoMoreTransitions = errors.New("no more transitions")
+var InvalidEvent = errors.New("invalid event")
 
 type State string
 
@@ -32,12 +36,12 @@ func (m *StateMachine) getCurrentNode() *Node {
 
 func (m *StateMachine) getNextNode(event Event) (*Node, error) {
 	if m.CurrentNode == nil {
-		return nil, fmt.Errorf("nowhere to go anymore!\n")
+		return nil, NoMoreTransitions
 	}
 
 	transition, ok := m.CurrentNode.Transitions[event]
 	if !ok {
-		return nil, fmt.Errorf("invalid event: %v", event)
+		return nil, InvalidEvent
 	}
 
 	return transition.Node, nil
