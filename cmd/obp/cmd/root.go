@@ -9,6 +9,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"code.ndumas.com/ndumas/obsidian-pipeline/gloss"
 )
 
 var cfgFile string
@@ -45,6 +47,8 @@ func init() {
 	// when this action is called directly.
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
+	rootCmd.SetHelpFunc(gloss.CharmHelp)
+	rootCmd.SetUsageFunc(gloss.CharmUsage)
 }
 
 // initConfig reads in config file and ENV variables if set.
