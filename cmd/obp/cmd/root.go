@@ -16,9 +16,10 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "obp",
-	Short: "obp is a toolkit for managing your vault in headless contexts",
-	Long:  `a suite of tools for managing your obsidian vault`,
+	TraverseChildren: true,
+	Use:              "obp",
+	Short:            "obp is a toolkit for managing your vault in headless contexts",
+	Long:             `a suite of tools for managing your obsidian vault`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		// here is where I validate arguments, open and parse config files, etc
 		return nil
