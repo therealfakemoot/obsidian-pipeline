@@ -1,21 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ndumas.com/schemas/note.json",
-  "title":"note",
+  "$id": "https://ndumas.com/schemas/post.json",
+  "title":"post",
   "description":"properties all notes must have",
   "type":"object",
   "properties": {
     "title": {
-      "description":"Title of the note",
-      "type": "string"
+      "$ref":"https://ndumas.com/schemas/note.json"
     },
-    "aliases": {
-      "description":"alternate names for the notes",
+    "date": {
+      "type":"date"
+    },
+    "series": {
       "type": "array",
       "items": {
         "type":"string",
-        "uniqueItems": true,
-        "minItems": 1
+        "uniqueItems": true
       }
     }
   },
