@@ -63,7 +63,7 @@ var validateCmd = &cobra.Command{
 			log.Fatalf("error adding resource to jsonschema compiler: %s\n", err)
 		}
 
-		schema, err := compiler.Compile("schema.json")
+		schema, err := compiler.Compile(schemaFilename)
 		if err != nil {
 			log.Fatalf("error compiling schema: %s\n", err)
 		}
