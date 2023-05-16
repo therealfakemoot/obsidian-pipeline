@@ -16,5 +16,6 @@
         "minItems": 1
       }
     }
-  }
+  },
+  "required": ["title","aliases"]
 }
