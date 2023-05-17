@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
 
 	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
 	"github.com/spf13/cobra"
@@ -53,6 +54,15 @@ var validateCmd = &cobra.Command{
 			}
 
 			log.Printf("scanning %q\n", path)
+			absPath, err := filepath.Abs(filepath.Join(target, path))
+			if err != nil {
+				return fmt.Errorf("error generating absolute path for %q", target)
+			}
+			target, err := os.Open(absPath)
+			if err != nil {
+				return fmt.Errorf("could not open target file: %w", err)
+			}
+			defer target.Close()
 			return obp.Validate(schema, target)
 		})
 		// return obp.Validate(schema, target)
