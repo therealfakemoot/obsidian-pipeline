@@ -4,17 +4,30 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"os"
-	"strings"
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
+	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
+
+func LoadURL(s string) (io.ReadCloser, error) {
+	u, err := url.Parse(s)
+	if err != nil {
+		return nil, err
+	}
+	loader, ok := jsonschema.Loaders[u.Scheme]
+	if !ok {
+		return nil, jsonschema.LoaderNotFoundError(s)
+
+	}
+	return loader(s)
+}
 
 // rootCmd represents the base command when called without any subcommands
 var validateCmd = &cobra.Command{
@@ -25,8 +38,8 @@ var validateCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		schemaFilename := cmd.Flag("schema").Value.String()
-		if len(schemaFilename) == 0 {
+		schemaURL := cmd.Flag("schema").Value.String()
+		if len(schemaURL) == 0 {
 			return fmt.Errorf("Please profide a schema filename")
 		}
 		target := cmd.Flag("target").Value.String()
@@ -37,14 +50,8 @@ var validateCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var m interface{}
-		var schemaBytes bytes.Buffer
 
-		schemaFilename := cmd.Flag("schema").Value.String()
-		schemaFile, err := os.Open(schemaFilename)
-		if err != nil {
-			log.Fatalf("could not open schema file: %s\n", err)
-		}
-		io.Copy(&schemaBytes, schemaFile)
+		schemaURL := cmd.Flag("schema").Value.String()
 
 		// err := yaml.Unmarshal([]byte(yamlText), &m)
 		targetFilename := cmd.Flag("target").Value.String()
@@ -59,11 +66,7 @@ var validateCmd = &cobra.Command{
 		}
 
 		compiler := jsonschema.NewCompiler()
-		if err := compiler.AddResource(schemaFilename, strings.NewReader(schemaBytes.String())); err != nil {
-			log.Fatalf("error adding resource to jsonschema compiler: %s\n", err)
-		}
-
-		schema, err := compiler.Compile(schemaFilename)
+		schema, err := compiler.Compile(schemaURL)
 		if err != nil {
 			log.Fatalf("error compiling schema: %s\n", err)
 		}
