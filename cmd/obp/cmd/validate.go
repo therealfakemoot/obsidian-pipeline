@@ -5,6 +5,9 @@ package cmd
 
 import (
 	"fmt"
+	"io/fs"
+	"log"
+	"os"
 
 	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
 	"github.com/spf13/cobra"
@@ -29,12 +32,30 @@ var validateCmd = &cobra.Command{
 		if len(target) == 0 {
 			return fmt.Errorf("Please profide a target filename")
 		}
+		root := os.DirFS(target)
+		_, err := root.Open(".")
+		if err != nil {
+			return fmt.Errorf("cannot open target directory %q: %w", target, err)
+		}
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		schema := cmd.Flag("schema").Value.String()
 		target := cmd.Flag("target").Value.String()
-		return obp.Validate(schema, target)
+		root := os.DirFS(target)
+		return fs.WalkDir(root, ".", func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if d.IsDir() {
+				return nil
+			}
+
+			log.Printf("scanning %q\n", path)
+			return obp.Validate(schema, target)
+		})
+		// return obp.Validate(schema, target)
 	},
 }
 
@@ -43,6 +64,6 @@ func init() {
 	// when this action is called directly.
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	validateCmd.Flags().StringP("schema", "s", "base.schema", "path to protobuf file")
-	validateCmd.Flags().StringP("target", "t", "", "list of filenames to validate")
+	validateCmd.Flags().StringP("target", "t", "", "directory containing validation targets")
 	rootCmd.AddCommand(validateCmd)
 }
