@@ -1,4 +1,4 @@
-package obspipeline
+package obp
 
 func (p *Pipeline) FindAttachments() error {
 

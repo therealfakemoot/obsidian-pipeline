@@ -1,4 +1,4 @@
-package obspipeline
+package obp
 
 import (
 	"go.uber.org/zap"
