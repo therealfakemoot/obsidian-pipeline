@@ -56,7 +56,7 @@ var validateCmd = &cobra.Command{
 			log.Fatalf("error compiling schema: %s\n", err)
 		}
 		if err := schema.Validate(m); err != nil {
-			log.Fatalf("error validating: %s\n", err)
+			log.Fatalf("error validating: %#v\n", err)
 		}
 		fmt.Println("validation successfull")
 	},
