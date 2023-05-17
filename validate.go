@@ -2,7 +2,6 @@ package obp
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
@@ -15,23 +14,22 @@ func Validate(schemaURL, filename string) error {
 
 	target, err := os.Open(filename)
 	if err != nil {
-		log.Fatalf("could not open target file: %s\n", err)
+		return fmt.Errorf("could not open target file: %w", err)
 	}
 	dec := yaml.NewDecoder(target)
 	err = dec.Decode(&m)
 	if err != nil {
-		log.Fatalf("error decoding YAML: %s\n", err)
+		return fmt.Errorf("error decoding YAML: %w", err)
 	}
 
 	compiler := jsonschema.NewCompiler()
 	schema, err := compiler.Compile(schemaURL)
 	if err != nil {
-		log.Fatalf("error compiling schema: %s\n", err)
+		return fmt.Errorf("error compiling schema: %w", err)
 	}
 	if err := schema.Validate(m); err != nil {
-		log.Fatalf("error validating: %#v\n", err)
+		return fmt.Errorf("error validating target %q: %w", filename, err)
 	}
-	fmt.Println("validation successfull")
 
 	return nil
 }

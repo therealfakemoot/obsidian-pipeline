@@ -31,10 +31,10 @@ var validateCmd = &cobra.Command{
 		}
 		return nil
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		schema := cmd.Flag("schema").Value.String()
 		target := cmd.Flag("target").Value.String()
-		obp.Validate(schema, target)
+		return obp.Validate(schema, target)
 	},
 }
 
