@@ -5,9 +5,7 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"log"
-	"net/url"
 	"os"
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
@@ -15,19 +13,6 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
-
-func LoadURL(s string) (io.ReadCloser, error) {
-	u, err := url.Parse(s)
-	if err != nil {
-		return nil, err
-	}
-	loader, ok := jsonschema.Loaders[u.Scheme]
-	if !ok {
-		return nil, jsonschema.LoaderNotFoundError(s)
-
-	}
-	return loader(s)
-}
 
 // rootCmd represents the base command when called without any subcommands
 var validateCmd = &cobra.Command{
