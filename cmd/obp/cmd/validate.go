@@ -26,10 +26,6 @@ var validateCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		schemaURL := cmd.Flag("schema").Value.String()
-		if len(schemaURL) == 0 {
-			return fmt.Errorf("Please profide a schema filename")
-		}
 		target := cmd.Flag("target").Value.String()
 		if len(target) == 0 {
 			return fmt.Errorf("Please profide a target filename")
@@ -37,7 +33,7 @@ var validateCmd = &cobra.Command{
 		root := os.DirFS(target)
 		_, err := root.Open(".")
 		if err != nil {
-			return fmt.Errorf("cannot open target directory %q: %w", target, err)
+			return fmt.Errorf("cannot open provided vault root %q: %w", target, err)
 		}
 		return nil
 	},
