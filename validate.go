@@ -4,18 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
 	"gopkg.in/yaml.v3"
-)
-
-type PrettyDetailFormat int
-
-const (
-	JSON = iota
-	Markdown
-	CSV
 )
 
 func Validate(schemaURL string, r io.Reader) error {
@@ -48,15 +41,23 @@ func recurseDetails(detailed jsonschema.Detailed, acc []jsonschema.Detailed) []j
 	return acc
 }
 
-func PrettyDetails(w io.Writer, format PrettyDetailFormat, details jsonschema.Detailed) error {
+func PrettyDetails(w io.Writer, format string, details jsonschema.Detailed) error {
+	log.Printf("received format %q\n", format)
 	acc := make([]jsonschema.Detailed, 0)
 	errors := recurseDetails(details, acc)
 	switch format {
-	case JSON:
+	case "json":
 		enc := json.NewEncoder(w)
-		err := enc.Encode(errors)
+		err := enc.Encode(details)
 		if err != nil {
 			return fmt.Errorf("error writing JSON payload to provided writer: %w", err)
+		}
+	case "markdown":
+		fmt.Fprintf(w, "# Validation errors for \n")
+		fmt.Fprintf(w, "Valid|KeywordLocation|AbsoluteKeywordLocation|Instance Location|Error")
+		fmt.Fprintf(w, "---|---|---|---|---")
+		for _, e := range errors {
+			fmt.Fprintf(w, "%t|%s|%s|%s|%s\n", e.Valid, e.KeywordLocation, e.AbsoluteKeywordLocation, e.InstanceLocation, e.Error)
 		}
 	default:
 		return fmt.Errorf("unknown format")

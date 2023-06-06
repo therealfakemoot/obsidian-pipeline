@@ -12,6 +12,7 @@ import (
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"code.ndumas.com/ndumas/obsidian-pipeline"
 )
@@ -37,8 +38,8 @@ var validateCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		schema := cmd.Flag("schema").Value.String()
-		target := cmd.Flag("target").Value.String()
+		schema := viper.GetString("schema")
+		target := viper.GetString("target")
 		root := os.DirFS(target)
 
 		err := fs.WalkDir(root, ".", func(path string, d fs.DirEntry, err error) error {
@@ -62,7 +63,7 @@ var validateCmd = &cobra.Command{
 			err = obp.Validate(schema, target)
 			if err != nil {
 				details := err.(*jsonschema.ValidationError).DetailedOutput()
-				obp.PrettyDetails(cmd.OutOrStdout(), obp.JSON, details)
+				obp.PrettyDetails(cmd.OutOrStdout(), viper.GetString("format"), details)
 			}
 			return nil
 		})
@@ -79,4 +80,6 @@ func init() {
 	validateCmd.Flags().StringP("target", "t", "", "directory containing validation targets")
 	validateCmd.MarkFlagsRequiredTogether("schema", "target")
 	rootCmd.AddCommand(validateCmd)
+	viper.BindPFlag("schema", validateCmd.Flags().Lookup("schema"))
+	viper.BindPFlag("target", validateCmd.Flags().Lookup("target"))
 }

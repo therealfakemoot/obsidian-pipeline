@@ -15,6 +15,7 @@ import (
 var (
 	vault   string
 	cfgFile string
+	format  string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -48,6 +49,11 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.obp.toml", "config file")
 	rootCmd.PersistentFlags().StringVar(&vault, "vault", "", "vault root directory")
 	rootCmd.MarkPersistentFlagRequired("vault")
+	rootCmd.PersistentFlags().StringVar(&format, "format", "markdown", "output format [markdown, json, csv]")
+	rootCmd.MarkPersistentFlagRequired("format")
+
+	viper.BindPFlag("format", validateCmd.Flags().Lookup("format"))
+	viper.BindPFlag("vault", validateCmd.Flags().Lookup("vault"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
