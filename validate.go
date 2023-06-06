@@ -24,7 +24,7 @@ func Validate(schemaURL string, r io.Reader) error {
 		return fmt.Errorf("error compiling schema: %w", err)
 	}
 	if err := schema.Validate(m); err != nil {
-		return fmt.Errorf("error validating target: %w", err)
+		return err
 	}
 
 	return nil

@@ -12,7 +12,10 @@ import (
 	// "code.ndumas.com/ndumas/obsidian-pipeline/gloss"
 )
 
-var cfgFile string
+var (
+	vault   string
+	cfgFile string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -42,7 +45,9 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.obp.toml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.obp.toml", "config file")
+	rootCmd.PersistentFlags().StringVar(&vault, "vault", "", "vault root directory")
+	rootCmd.MarkPersistentFlagRequired("vault")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -55,7 +60,6 @@ func init() {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	if cfgFile != "" {
-		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.

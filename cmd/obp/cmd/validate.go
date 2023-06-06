@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/santhosh-tekuri/jsonschema/v5"
 	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
 	"github.com/spf13/cobra"
 
@@ -44,7 +45,8 @@ var validateCmd = &cobra.Command{
 		schema := cmd.Flag("schema").Value.String()
 		target := cmd.Flag("target").Value.String()
 		root := os.DirFS(target)
-		return fs.WalkDir(root, ".", func(path string, d fs.DirEntry, err error) error {
+
+		err := fs.WalkDir(root, ".", func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
@@ -63,9 +65,14 @@ var validateCmd = &cobra.Command{
 				return fmt.Errorf("could not open target file: %w", err)
 			}
 			defer target.Close()
-			return obp.Validate(schema, target)
+			err = obp.Validate(schema, target)
+			if err != nil {
+				log.Printf("error validating input file %q: %#+v\n", path, err.(*jsonschema.ValidationError).DetailedOutput())
+			}
+			return nil
 		})
-		// return obp.Validate(schema, target)
+
+		return err
 	},
 }
 

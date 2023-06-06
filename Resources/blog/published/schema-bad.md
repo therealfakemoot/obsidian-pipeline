@@ -1,5 +1,9 @@
 ---
 aliases: []
+title: ""
+description: 4
+tags: "fart"
+draft: 3
 ---
 
 ## Textual Cartography
