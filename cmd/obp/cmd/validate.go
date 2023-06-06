@@ -82,5 +82,6 @@ func init() {
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	validateCmd.Flags().StringP("schema", "s", "base.schema", "path to protobuf file")
 	validateCmd.Flags().StringP("target", "t", "", "directory containing validation targets")
+	validateCmd.MarkFlagsRequiredTogether("schema", "target")
 	rootCmd.AddCommand(validateCmd)
 }
