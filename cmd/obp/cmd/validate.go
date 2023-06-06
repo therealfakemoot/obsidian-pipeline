@@ -6,7 +6,6 @@ package cmd
 import (
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -51,7 +50,6 @@ var validateCmd = &cobra.Command{
 				return nil
 			}
 
-			log.Printf("scanning %q\n", path)
 			absPath, err := filepath.Abs(filepath.Join(target, path))
 			if err != nil {
 				return fmt.Errorf("error generating absolute path for %q", target)
@@ -63,7 +61,8 @@ var validateCmd = &cobra.Command{
 			defer target.Close()
 			err = obp.Validate(schema, target)
 			if err != nil {
-				log.Printf("error validating input file %q: %#+v\n", path, err.(*jsonschema.ValidationError).DetailedOutput())
+				details := err.(*jsonschema.ValidationError).DetailedOutput()
+				obp.PrettyDetails(cmd.OutOrStdout(), obp.JSON, details)
 			}
 			return nil
 		})
