@@ -56,7 +56,7 @@ func PrettyDetails(w io.Writer, format string, details jsonschema.Detailed, file
 		}
 	case "markdown":
 		fmt.Fprintf(w, "# Validation Errors for %q\n", filename)
-		fmt.Fprintf(w, "Keyword Location|Instance Location|Error\n")
+		fmt.Fprintf(w, "Validation Rule|Failing Property|Error\n")
 		fmt.Fprintf(w, "--|---|---\n")
 		for _, e := range errors {
 			fmt.Fprintf(w, "%s|%s|%s\n", e.KeywordLocation, e.InstanceLocation, e.Error)
