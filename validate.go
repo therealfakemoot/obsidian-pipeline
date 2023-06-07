@@ -31,20 +31,20 @@ func Validate(schemaURL string, r io.Reader) error {
 	return nil
 }
 
-func recurseDetails(detailed jsonschema.Detailed, acc []jsonschema.Detailed) []jsonschema.Detailed {
+func flattenDetails(detailed jsonschema.Detailed, acc []jsonschema.Detailed) []jsonschema.Detailed {
 	if detailed.Error != "" {
 		acc = append(acc, detailed)
 	}
 	for _, e := range detailed.Errors {
-		acc = append(acc, recurseDetails(e, acc)...)
+		acc = append(acc, flattenDetails(e, acc)...)
 	}
 
 	return acc
 }
 
-func PrettyDetails(w io.Writer, format string, details jsonschema.Detailed) error {
+func PrettyDetails(w io.Writer, format string, details jsonschema.Detailed, filename string) error {
 	acc := make([]jsonschema.Detailed, 0)
-	errors := recurseDetails(details, acc)
+	errors := flattenDetails(details, acc)
 	switch format {
 	case "json":
 		enc := json.NewEncoder(w)
@@ -53,10 +53,11 @@ func PrettyDetails(w io.Writer, format string, details jsonschema.Detailed) erro
 			return fmt.Errorf("error writing JSON payload to provided writer: %w", err)
 		}
 	case "markdown":
-		fmt.Fprintf(w, "Valid|KeywordLocation|AbsoluteKeywordLocation|Instance Location|Error\n")
-		fmt.Fprintf(w, "---|---|---|---|---\n")
+		fmt.Fprintf(w, "# Validation Errors for %q\n", filename)
+		fmt.Fprintf(w, "eyword Location|Instance Location|Error\n")
+		fmt.Fprintf(w, "--|---|---\n")
 		for _, e := range errors {
-			fmt.Fprintf(w, "%t|%s|%s|%s|%s\n", e.Valid, e.KeywordLocation, e.AbsoluteKeywordLocation, e.InstanceLocation, e.Error)
+			fmt.Fprintf(w, "%s|%s|%s\n", e.KeywordLocation, e.InstanceLocation, e.Error)
 		}
 	default:
 		return fmt.Errorf("unknown format")

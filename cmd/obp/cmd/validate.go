@@ -63,7 +63,7 @@ var validateCmd = &cobra.Command{
 			err = obp.Validate(schema, target)
 			if err != nil {
 				details := err.(*jsonschema.ValidationError).DetailedOutput()
-				obp.PrettyDetails(cmd.OutOrStdout(), viper.GetString("format"), details)
+				obp.PrettyDetails(cmd.OutOrStdout(), viper.GetString("format"), details,absPath)
 			}
 			return nil
 		})
