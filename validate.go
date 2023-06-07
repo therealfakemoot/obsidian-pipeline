@@ -10,6 +10,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Validate accepts a Markdown file as input via the Reader
+// and parses the frontmatter present, if any. It then
+// applies the schema fetched from schemaURL against the
+// decoded YAML.
 func Validate(schemaURL string, r io.Reader) error {
 	var m interface{}
 
@@ -42,6 +46,10 @@ func recurseDetails(detailed jsonschema.Detailed, acc map[string]jsonschema.Deta
 	return acc
 }
 
+// PrettyDetails takes error output from jsonschema.Validate
+// and pretty-prints it to stdout.
+//
+// Supported formats are: JSON, Markdown
 func PrettyDetails(w io.Writer, format string, details jsonschema.Detailed, filename string) error {
 	// acc := make([]jsonschema.Detailed, 0)
 	acc := make(map[string]jsonschema.Detailed)

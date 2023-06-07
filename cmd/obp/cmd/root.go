@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -18,7 +19,6 @@ var (
 	format  string
 )
 
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	TraverseChildren: true,
 	Use:              "obp",
@@ -33,8 +33,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
@@ -42,24 +41,32 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.obp.toml", "config file")
 
 	rootCmd.PersistentFlags().StringVar(&vault, "vault", "", "vault root directory")
-	rootCmd.MarkPersistentFlagRequired("vault")
+
+	err := rootCmd.MarkPersistentFlagRequired("vault")
+
+	if err != nil {
+		log.Panicln("error setting vault flag as required")
+	}
 
 	rootCmd.PersistentFlags().StringVar(&format, "format", "markdown", "output format [markdown, json, csv]")
-	rootCmd.MarkPersistentFlagRequired("format")
 
-	viper.BindPFlag("format", rootCmd.PersistentFlags().Lookup("format"))
-	viper.BindPFlag("vault", rootCmd.PersistentFlags().Lookup("vault"))
+	err = rootCmd.MarkPersistentFlagRequired("format")
+	if err != nil {
+		log.Panicln("error setting format flag as required")
+	}
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	err = viper.BindPFlag("format", rootCmd.PersistentFlags().Lookup("format"))
+	if err != nil {
+		log.Panicln("error binding viper to format flag")
+	}
+
+	err = viper.BindPFlag("vault", rootCmd.PersistentFlags().Lookup("vault"))
+	if err != nil {
+		log.Panicln("error binding viper to vault flag")
+	}
 
 	// rootCmd.SetHelpFunc(gloss.CharmHelp)
 	// rootCmd.SetUsageFunc(gloss.CharmUsage)
