@@ -62,8 +62,11 @@ var validateCmd = &cobra.Command{
 			defer target.Close()
 			err = obp.Validate(schema, target)
 			if err != nil {
-				details := err.(*jsonschema.ValidationError).DetailedOutput()
-				obp.PrettyDetails(cmd.OutOrStdout(), viper.GetString("format"), details,absPath)
+				details, ok := err.(*jsonschema.ValidationError)
+				if !ok {
+					return err
+				}
+				obp.PrettyDetails(cmd.OutOrStdout(), viper.GetString("format"), details.DetailedOutput(), absPath)
 			}
 			return nil
 		})
