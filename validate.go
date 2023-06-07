@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
 	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
@@ -33,7 +32,9 @@ func Validate(schemaURL string, r io.Reader) error {
 }
 
 func recurseDetails(detailed jsonschema.Detailed, acc []jsonschema.Detailed) []jsonschema.Detailed {
-	acc = append(acc, detailed)
+	if detailed.Error != "" {
+		acc = append(acc, detailed)
+	}
 	for _, e := range detailed.Errors {
 		acc = append(acc, recurseDetails(e, acc)...)
 	}
@@ -42,7 +43,6 @@ func recurseDetails(detailed jsonschema.Detailed, acc []jsonschema.Detailed) []j
 }
 
 func PrettyDetails(w io.Writer, format string, details jsonschema.Detailed) error {
-	log.Printf("received format %q\n", format)
 	acc := make([]jsonschema.Detailed, 0)
 	errors := recurseDetails(details, acc)
 	switch format {
@@ -53,9 +53,8 @@ func PrettyDetails(w io.Writer, format string, details jsonschema.Detailed) erro
 			return fmt.Errorf("error writing JSON payload to provided writer: %w", err)
 		}
 	case "markdown":
-		fmt.Fprintf(w, "# Validation errors for \n")
-		fmt.Fprintf(w, "Valid|KeywordLocation|AbsoluteKeywordLocation|Instance Location|Error")
-		fmt.Fprintf(w, "---|---|---|---|---")
+		fmt.Fprintf(w, "Valid|KeywordLocation|AbsoluteKeywordLocation|Instance Location|Error\n")
+		fmt.Fprintf(w, "---|---|---|---|---\n")
 		for _, e := range errors {
 			fmt.Fprintf(w, "%t|%s|%s|%s|%s\n", e.Valid, e.KeywordLocation, e.AbsoluteKeywordLocation, e.InstanceLocation, e.Error)
 		}
