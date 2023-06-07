@@ -47,13 +47,15 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.obp.toml", "config file")
+
 	rootCmd.PersistentFlags().StringVar(&vault, "vault", "", "vault root directory")
 	rootCmd.MarkPersistentFlagRequired("vault")
+
 	rootCmd.PersistentFlags().StringVar(&format, "format", "markdown", "output format [markdown, json, csv]")
 	rootCmd.MarkPersistentFlagRequired("format")
 
-	viper.BindPFlag("format", validateCmd.Flags().Lookup("format"))
-	viper.BindPFlag("vault", validateCmd.Flags().Lookup("vault"))
+	viper.BindPFlag("format", rootCmd.PersistentFlags().Lookup("format"))
+	viper.BindPFlag("vault", rootCmd.PersistentFlags().Lookup("vault"))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
