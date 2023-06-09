@@ -40,7 +40,7 @@ jobs:
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         with:
-          workdir: "./cmd/obp/cmd/"
+          workdir: "./cmd/obp/"
           distribution: goreleaser
           version: ${{ env.GITHUB_REF_NAME }}
           args: release --clean
