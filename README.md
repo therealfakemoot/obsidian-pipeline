@@ -1,9 +1,13 @@
 # obsidian-pipeline
 
-# Features
+# Overview
 `obsidian-pipeline` or `obp` enables headless management of your Obsidian vault.
 
-Maintaining a collection of notes involves a lot of logistical overhead.
+`obp` is primarily targeted at users who are programmatically interacting
+with their vaults, publishing them via static site generators or doing
+quality control with scheduled tasks.
+
+# Features
 ## Validation
 Markdown allows you to preface your document with another, typically in
 YAML, that contains metadata about the document. A common use-case for this is
