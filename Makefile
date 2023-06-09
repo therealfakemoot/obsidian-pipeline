@@ -12,7 +12,9 @@ clean-all:
 	rm bin/${BINARY_NAME}-windows.exe
 
 test:
+	go mod tidy
 	go test ./...
 
 test_coverage:
+	go mod tidy
 	go test ./... -coverprofile=coverage.out
