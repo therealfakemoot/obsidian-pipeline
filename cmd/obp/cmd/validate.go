@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -23,23 +24,12 @@ var validateCmd = &cobra.Command{
 	Short: "loads a note and ensures its frontmatter follows the provided protobuf schema",
 	Long: `Validate YAML frontmatter with jsonschema
 `,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		target := cmd.Flag("target").Value.String()
-		if len(target) == 0 {
-			return fmt.Errorf("Please profide a target filename")
-		}
-		root := os.DirFS(target)
-		_, err := root.Open(".")
-		if err != nil {
-			return fmt.Errorf("cannot open provided vault root %q: %w", target, err)
-		}
-		return nil
-	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		schema := viper.GetString("schema")
 		target := viper.GetString("target")
+		if target == "" {
+			return fmt.Errorf("target flag must not be empty")
+		}
 		root := os.DirFS(target)
 
 		err := fs.WalkDir(root, ".", func(path string, d fs.DirEntry, err error) error {
@@ -82,7 +72,22 @@ func init() {
 	validateCmd.Flags().StringP("schema", "s", "base.schema", "path to protobuf file")
 	validateCmd.Flags().StringP("target", "t", "", "directory containing validation targets")
 	validateCmd.MarkFlagsRequiredTogether("schema", "target")
+	validateCmd.PersistentFlags().StringVar(&format, "format", "markdown", "output format [markdown, json, csv]")
 	rootCmd.AddCommand(validateCmd)
-	viper.BindPFlag("schema", validateCmd.Flags().Lookup("schema"))
-	viper.BindPFlag("target", validateCmd.Flags().Lookup("target"))
+
+	err := viper.BindPFlag("schema", validateCmd.Flags().Lookup("schema"))
+	if err != nil {
+		log.Panicln("error binding viper to schema flag:", err)
+	}
+
+	err = viper.BindPFlag("target", validateCmd.Flags().Lookup("target"))
+	if err != nil {
+		log.Panicln("error binding viper to target flag:", err)
+	}
+
+	err = viper.BindPFlag("format", validateCmd.PersistentFlags().Lookup("format"))
+	if err != nil {
+		log.Panicln("error binding viper to format flag:", err)
+	}
+
 }

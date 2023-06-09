@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -42,31 +41,6 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "~/.obp.toml", "config file")
-
-	rootCmd.PersistentFlags().StringVar(&vault, "vault", "", "vault root directory")
-
-	err := rootCmd.MarkPersistentFlagRequired("vault")
-
-	if err != nil {
-		log.Panicln("error setting vault flag as required")
-	}
-
-	rootCmd.PersistentFlags().StringVar(&format, "format", "markdown", "output format [markdown, json, csv]")
-
-	err = rootCmd.MarkPersistentFlagRequired("format")
-	if err != nil {
-		log.Panicln("error setting format flag as required")
-	}
-
-	err = viper.BindPFlag("format", rootCmd.PersistentFlags().Lookup("format"))
-	if err != nil {
-		log.Panicln("error binding viper to format flag")
-	}
-
-	err = viper.BindPFlag("vault", rootCmd.PersistentFlags().Lookup("vault"))
-	if err != nil {
-		log.Panicln("error binding viper to vault flag")
-	}
 
 	// rootCmd.SetHelpFunc(gloss.CharmHelp)
 	// rootCmd.SetUsageFunc(gloss.CharmUsage)
