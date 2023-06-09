@@ -1,9 +1,9 @@
 BINARY_NAME=obp
 
 build-all:
-	GOOS=darwin GOARCH=amd64 go build -o bin/${BINARY_NAME}-darwin
-	GOOS=linux GOARCH=amd64 go build -o bin/${BINARY_NAME}-linux
-	GOOS=windows GOARCH=amd64 go build -o bin/${BINARY_NAME}-windows.exe
+	GOOS=darwin GOARCH=amd64 go build -o bin/${BINARY_NAME}-darwin cmd/obp/*.go
+	GOOS=linux GOARCH=amd64 go build -o bin/${BINARY_NAME}-linux cmd/obp/*.go
+	GOOS=windows GOARCH=amd64 go build -o bin/${BINARY_NAME}-windows.exe cmd/obp/*.go
 
 clean-all:
 	go clean
