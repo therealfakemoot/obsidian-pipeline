@@ -22,7 +22,7 @@ func main() {
 	flag.StringVar(&blogDir, "blog", "", "vault directory containing blog posts to-be-published")
 
 	flag.Parse()
-	am := obspipeline.NewPipeline(dev)
+	am := obp.NewPipeline(dev)
 	defer am.L.Sync()
 
 	am.Source = source
