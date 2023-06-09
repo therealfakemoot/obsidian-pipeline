@@ -1,0 +1,4 @@
+builds:
+  id: "obp-release"
+  main: "./cmd/obp/cmd/"
+  binary: "obp"
