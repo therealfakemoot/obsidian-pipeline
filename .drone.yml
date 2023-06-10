@@ -4,13 +4,13 @@ name: publish-docker-image
 clone:
   depth: 1
 
-enviornment:
-	GITEA_AUTH_TOKEN:
-		from_secret: GITEA_AUTH_TOKEN
 
 steps:
 - name: build-and-public-docker-image
   image: docker:dind
+	enviornment:
+		GITEA_AUTH_TOKEN:
+			from_secret: GITEA_AUTH_TOKEN
   volumes:
   - name: dockersock
     path: /var/run
