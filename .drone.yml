@@ -4,6 +4,10 @@ name: publish-docker-image
 clone:
   depth: 1
 
+enviornment:
+	GITEA_AUTH_TOKEN:
+		from_secret: GITEA_AUTH_TOKEN
+
 steps:
 - name: build-and-public-docker-image
   image: docker:dind
@@ -12,6 +16,7 @@ steps:
     path: /var/run
   commands:
   - apk add git docker make
+	- docker login --user ndumas --password $GITEA_AUTH_TOKEN code.ndumas.com
   - make docker
 
 services:
