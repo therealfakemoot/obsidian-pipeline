@@ -6,7 +6,22 @@ clone:
 
 steps:
 - name: build-and-public-docker-image
-  image: alpine:latest
+  image: docker:dind
+  volumes:
+  - name: dockersock
+    path: /var/run
   commands:
   - apk add git docker make
   - make docker
+
+services:
+- name: docker
+  image: docker:dind
+  privileged: true
+  volumes:
+  - name: dockersock
+    path: /var/run
+
+volumes:
+- name: dockersock
+  temp: {}
