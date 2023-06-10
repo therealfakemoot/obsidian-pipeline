@@ -4,9 +4,8 @@ name: publish-docker-image
 clone:
   depth: 1
 
-
 steps:
-- name: copy-posts
+- name: build-and-public-docker-image
   image: alpine:latest
   commands:
   - make docker
