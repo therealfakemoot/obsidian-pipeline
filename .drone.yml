@@ -8,4 +8,5 @@ steps:
 - name: build-and-public-docker-image
   image: alpine:latest
   commands:
+  - apk add git docker make
   - make docker
