@@ -52,7 +52,7 @@ docker-image:
 
 
 # Parameters
-PKG = code.ndumas.com/ndumas/obsidian-pipeline/cmd/obp
+PKG = code.ndumas.com/ndumas/obsidian-pipeline/cmd
 NAME = obp
 DOC = README.md LICENSE
 
@@ -109,11 +109,11 @@ all: debug setup dep format lint test bench build dist
 
 setup: setup-dirs setup-build setup-format setup-lint setup-reports
 setup-reports: setup-dirs
-	go get github.com/tebeka/go2xunit
+	go install github.com/tebeka/go2xunit@latest
 setup-build: setup-dirs
-	go get github.com/mitchellh/gox
+	go install github.com/mitchellh/gox@latest
 setup-format: setup-dirs
-	go get github.com/sqs/goreturns
+	go install github.com/sqs/goreturns@latest
 setup-lint: setup-dirs
 setup-dirs:
 	mkdir -p "$(RPTDIR)"
