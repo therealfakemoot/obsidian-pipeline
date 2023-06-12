@@ -52,7 +52,7 @@ docker-image:
 
 
 # Parameters
-PKG = code.ndumas.com/ndumas/obsidian-pipeline/cmd
+PKG = code.ndumas.com/ndumas/obsidian-pipeline
 NAME = obp
 DOC = README.md LICENSE
 
@@ -108,34 +108,48 @@ INSTALL_TARGETS := $(addprefix install-,$(CMDS))
 all: debug setup dep format lint test bench build dist
 
 setup: setup-dirs setup-build setup-format setup-lint setup-reports
+
 setup-reports: setup-dirs
 	go install github.com/tebeka/go2xunit@latest
+
 setup-build: setup-dirs
 	go install github.com/mitchellh/gox@latest
+
 setup-format: setup-dirs
 	go install github.com/sqs/goreturns@latest
+
 setup-lint: setup-dirs
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.1
+
 setup-dirs:
 	mkdir -p "$(RPTDIR)"
 	mkdir -p "$(DISTDIR)"
+
 clean:
 	$(GOCLEAN) $(PKG)
-	rm -rf "$(DISTDIR)"/*
-	rm -f "$(RPTDIR)"/*
+	rm -vrf "$(DISTDIR)"/*
+	rm -vf "$(RPTDIR)"/*
+
 format:
 	$(GOFMT) "$(PKGDIR)"
+
 dep:
 	$(GODEP) $(PKG)/...
+
 lint: setup-dirs dep
 	$(GOLINT) "$(PKGDIR)" | tee "$(RPTDIR)/lint.out"
+
 check: setup-dirs clean dep
 	$(GOTEST) $$(go list "$(PKG)/..." | grep -v /vendor/) | tee "$(RPTDIR)/test.out"
+
 bench: setup-dirs clean dep
 	$(GOBENCH) $$(go list "$(PKG)/..." | grep -v /vendor/) | tee "$(RPTDIR)/bench.out"
+
 report: check
 	cd "$(PKGDIR)";$(SLOCCMD) --out="$(RPTDIR)/cloc.xml" . | tee "$(RPTDIR)/cloc.out"
 	cat "$(RPTDIR)/test.out" | $(XUCMD) -output "$(RPTDIR)/tests.xml"
 	go list -f '{{join .Deps "\n"}}' "$(CMDPKG)/..." | sort | uniq | xargs -I {} sh -c "go list -f '{{if not .Standard}}{{.ImportPath}}{{end}}' {} | tee -a '$(RPTDIR)/deps.out'"
+
 build: $(CMDS)
 $(CMDS): setup-dirs dep
 	$(GOBUILD) "$(CMDPKG)/$@" | tee "$(RPTDIR)/build-$@.out"
@@ -154,6 +168,7 @@ dist: clean build
 	cd "$(DISTDIR)"; for dir in ./*darwin*; do $(GZCMD) "$(basename "$$dir").tar.gz" "$$dir"; done
 	cd "$(DISTDIR)"; find . -maxdepth 1 -type f -printf "$(SHACMD) %P | tee \"./%P.sha\"\n" | sh
 	$(info "Built v$(VERSION), build $(COMMIT_ID)")
+
 debug:
 	$(info MD=$(MD))
 	$(info WD=$(WD))
