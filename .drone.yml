@@ -17,8 +17,8 @@ steps:
   - echo $GITEA_DOCKER_REGISTRY_TOKEN > ~/.docker/config.json
   - make docker
   enviornment:
-    GITEA_AUTH_TOKEN:
-      from_secret: GITEA_AUTH_TOKEN
+    GITEA_DOCKER_REGISTRY_TOKEN:
+      from_secret: GITEA_DOCKER_REGISTRY_TOKEN
 
 services:
 - name: docker
