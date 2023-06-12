@@ -106,7 +106,10 @@ func (p *Pipeline) Move() error {
 			if !ok {
 				return fmt.Errorf("Attachment is linked by post %q but doesn't exist in attachments directory %q", post, p.AttachmentsDir)
 			}
-			moveAttachment(post, att, p.L.Named("moveAttachment"))
+			err := moveAttachment(post, att, p.L.Named("moveAttachment"))
+			if err != nil {
+				return fmt.Errorf("error moving attachments: %w", err)
+			}
 		}
 	}
 
