@@ -13,7 +13,8 @@ steps:
     path: /var/run
   commands:
   - apk add git docker make
-  - echo $GITEA_AUTH_TOKEN | docker login --username ndumas --password-stdin code.ndumas.com
+  - mkdir ~/.docker/
+  - echo $GITEA_DOCKER_REGISTRY_TOKEN > ~/.docker/config.json
   - make docker
   enviornment:
     GITEA_AUTH_TOKEN:
