@@ -15,7 +15,6 @@ steps:
   - apk add git docker make
   - mkdir ~/.docker/
   - echo $GITEA_DOCKER_REGISTRY_TOKEN > $HOME/docker/config.json
-  - docker login code.ndumas.com
   - make docker
   enviornment:
     GITEA_AUTH_TOKEN:
