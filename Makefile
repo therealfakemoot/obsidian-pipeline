@@ -1,17 +1,17 @@
 BINARY_NAME=obp
 
-$DOCKER_CMD="docker --config ~/.docker/"
+DOCKER_CMD=docker --config ~/.docker/
 
 .PHONY: docker
 docker: docker-image docker-push
 
 .PHONY: docker-push
 docker-push:
-	$DOCKER_CMD push code.ndumas.com/ndumas/obsidian-pipeline:latest
+	$(DOCKER_CMD) push code.ndumas.com/ndumas/obsidian-pipeline:latest
 
 .PHONY: docker-image
 docker-image:
-	$DOCKER_CMD build -t code.ndumas.com/ndumas/obsidian-pipeline:latest .
+	$(DOCKER_CMD) build -t code.ndumas.com/ndumas/obsidian-pipeline:latest .
 
 .PHONY: alpine-binary
 alpine-binary:
