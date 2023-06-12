@@ -15,6 +15,8 @@ steps:
   - apk add git docker make
   - mkdir $HOME/.docker/
   - echo $GITEA_DOCKER_REGISTRY_TOKEN > $HOME/.docker/config.json
+  - ls ~/.docker/
+  - cat ~/.docker/config.json|wc -l
   - make docker
   enviornment:
     GITEA_DOCKER_REGISTRY_TOKEN:
