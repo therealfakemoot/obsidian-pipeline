@@ -14,7 +14,7 @@ steps:
   commands:
   - apk add git docker make
   - mkdir ~/.docker/
-  - echo $GITEA_DOCKER_REGISTRY_TOKEN > $HOME/docker/config.json
+  - echo $GITEA_DOCKER_REGISTRY_TOKEN > ~/.docker/config.json
   - make docker
   enviornment:
     GITEA_AUTH_TOKEN:
