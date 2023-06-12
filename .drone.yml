@@ -13,8 +13,8 @@ steps:
     path: /var/run
   commands:
   - apk add git docker make
-  - mkdir ~/.docker/
-  - echo $GITEA_DOCKER_REGISTRY_TOKEN > ~/.docker/config.json
+  - mkdir $HOME/.docker/
+  - echo $GITEA_DOCKER_REGISTRY_TOKEN > $HOME/.docker/config.json
   - make docker
   enviornment:
     GITEA_DOCKER_REGISTRY_TOKEN:
