@@ -17,7 +17,7 @@ steps:
   - echo "$GITEA_DOCKER_REGISTRY_TOKEN" > $HOME/.docker/config.json
   - cat ~/.docker/config.json|jq ".auths|keys"
   - make docker
-  enviornment:
+  environment:
     GITEA_DOCKER_REGISTRY_TOKEN:
       from_secret: GITEA_DOCKER_REGISTRY_TOKEN
 
