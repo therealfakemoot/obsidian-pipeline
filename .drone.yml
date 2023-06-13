@@ -36,3 +36,8 @@ services:
 volumes:
 - name: dockersock
   temp: {}
+
+trigger:
+  ref:
+    include:
+    - refs/tags/*
