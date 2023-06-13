@@ -3,14 +3,10 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 */
 package main
 
-import "code.ndumas.com/ndumas/obsidian-pipeline/cmd/obp/cmd"
-
-var (
-	Version, Tag string
+import (
+	"code.ndumas.com/ndumas/obsidian-pipeline/cmd/obp/cmd"
 )
 
 func main() {
-	cmd.Version = Version
-	cmd.Tag = Tag
 	cmd.Execute()
 }

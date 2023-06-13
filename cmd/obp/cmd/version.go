@@ -7,10 +7,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-)
 
-var (
-	Version, Tag string
+	"code.ndumas.com/ndumas/obsidian-pipeline"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -20,7 +18,7 @@ var versionCmd = &cobra.Command{
 	Long: `displays git tag and sha
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s %s\n", Version, Tag)
+		fmt.Printf("Version: %s Build: %s\n", obp.Version, obp.Build)
 	},
 }
 

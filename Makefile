@@ -82,11 +82,12 @@ BENCHCPUS ?= 1,2,4
 
 # Commands
 GOCMD = go
-ARCHES ?= 386 amd64
+ARCHES ?= amd64 386
 OSES ?= windows linux darwin
 OUTTPL = $(DISTDIR)/$(NAME)-$(VERSION)-{{.OS}}_{{.Arch}}/{{.Dir}}
 LDFLAGS = -X $(PKG).Version=$(VERSION) -X $(PKG).Build=$(COMMIT_ID)
 GOBUILD = gox -rebuild -gocmd="$(GOCMD)" -arch="$(ARCHES)" -os="$(OSES)" -output="$(OUTTPL)" -tags "$(BUILD_TAGS)" -ldflags "$(LDFLAGS)"
+GOBUILD_SIMPLE = go build -tags "$(BUILD_TAGS)" -ldflags "$(LDFLAGS)"
 GOCLEAN = $(GOCMD) clean
 GOINSTALL = $(GOCMD) install -a -tags "$(BUILD_TAGS)" -ldflags "$(LDFLAGS)"
 GOTEST = $(GOCMD) test -v -tags "$(BUILD_TAGS)"
