@@ -5,9 +5,9 @@ docker: docker-image docker-push
 
 .PHONY: docker-push
 docker-push:
-	$(DOCKER_CMD) pull code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION)
 	$(DOCKER_CMD) tag code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION) code.ndumas.com/ndumas/obsidian-pipeline:latest
 	$(DOCKER_CMD) push code.ndumas.com/ndumas/obsidian-pipeline:latest
+	$(DOCKER_CMD) push code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION)
 
 .PHONY: docker-image
 docker-image:
