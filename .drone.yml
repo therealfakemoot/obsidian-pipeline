@@ -6,7 +6,7 @@ clone:
 
 
 steps:
-- name: build-and-public-docker-image
+- name: clone
   image: alpine/git
   commands:
   - git clone https://code.ndumas.com/ndumas/obsidian-pipeline.git .
