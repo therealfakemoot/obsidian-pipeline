@@ -10,5 +10,7 @@ var (
 )
 
 func main() {
+	cmd.Version = Version
+	cmd.Tag = Tag
 	cmd.Execute()
 }
