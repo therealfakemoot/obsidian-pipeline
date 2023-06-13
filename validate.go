@@ -7,13 +7,12 @@ import (
 	"io"
 
 	"github.com/santhosh-tekuri/jsonschema/v5"
+	// allow the jsonschema validator to auto-download http-hosted schemas.
 	_ "github.com/santhosh-tekuri/jsonschema/v5/httploader"
 	"gopkg.in/yaml.v3"
 )
 
-var (
-	ErrUnsupportedOutputFormat = errors.New("unspported output format")
-)
+var ErrUnsupportedOutputFormat = errors.New("unspported output format")
 
 // Validate accepts a Markdown file as input via the Reader
 // and parses the frontmatter present, if any. It then
@@ -36,7 +35,7 @@ func Validate(schemaURL string, r io.Reader) error {
 		return fmt.Errorf("error compiling schema: %w", err)
 	}
 
-	return schema.Validate(frontmatter)
+	return fmt.Errorf("frontmatter failed validation: %w", schema.Validate(frontmatter))
 }
 
 func recurseDetails(detailed jsonschema.Detailed, acc map[string]jsonschema.Detailed) map[string]jsonschema.Detailed {

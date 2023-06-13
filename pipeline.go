@@ -184,12 +184,10 @@ func extractAttachments(post string) ([]string, error) {
 }
 
 func (p *Pipeline) FindAttachments() error {
-
 	return nil
 }
 
 func (p *Pipeline) MoveAttachments(post string) error {
-
 	return nil
 }
 
@@ -198,11 +196,9 @@ func (p *Pipeline) FindPosts() error {
 }
 
 func (p *Pipeline) SanitizePost(post string) error {
-
 	return nil
 }
 
 func (p *Pipeline) CopyPost(post string) error {
-
 	return nil
 }

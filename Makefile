@@ -95,7 +95,7 @@ GOBUILD = gox -osarch="!darwin/386" -rebuild -gocmd="$(GOCMD)" -arch="$(ARCHES)"
 GOCLEAN = $(GOCMD) clean
 GOINSTALL = $(GOCMD) install -a -tags "$(BUILD_TAGS)" -ldflags "$(LDFLAGS)"
 GOTEST = $(GOCMD) test -v -tags "$(BUILD_TAGS)"
-DISABLED_LINTERS = varnamelen,interfacer,ifshort,exhaustivestruct,maligned,varcheck,scopelint,structcheck,deadcode,nosnakecase,golint
+DISABLED_LINTERS = varnamelen,interfacer,ifshort,exhaustivestruct,maligned,varcheck,scopelint,structcheck,deadcode,nosnakecase,golint,depguard
 GOLINT = golangci-lint run --enable-all --disable "$(DISABLED_LINTERS)" --timeout=30s --tests
 GODEP = $(GOCMD) get -d -t
 GOFMT = goreturns -w
