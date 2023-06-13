@@ -12,10 +12,10 @@ steps:
   - name: dockersock
     path: /var/run
   commands:
-  - apk add git docker make jq
+  - apk add git docker make
   - mkdir $HOME/.docker/
   - echo "$GITEA_DOCKER_REGISTRY_TOKEN" > $HOME/.docker/config.json
-  - cat ~/.docker/config.json|jq ".auths|keys"
+  - make debug
   - make docker
   environment:
     GITEA_DOCKER_REGISTRY_TOKEN:
