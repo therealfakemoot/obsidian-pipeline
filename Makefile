@@ -23,6 +23,8 @@ build-alpine:
 # 	all: Format, check, build, and test the code
 #   setup: Install build/test toolchain dependencies (e.g. gox)
 #   lint: Run linters against source code
+#   bump-{major,minor,patch}: create a new semver git tag
+#   release-{major,minor,patch}: push a tagged release
 # 	format: Format the source files
 # 	build: Build the command(s) for target OS/arch combinations
 # 	install: Install the command(s)
@@ -112,6 +114,18 @@ INSTALL_TARGETS := $(addprefix install-,$(CMDS))
 .PHONY: all
 
 all: debug setup dep format lint test bench build dist
+
+release-major: bump-major
+	git push origin main --tags
+	git push github main --tags
+
+release-minor: bump-minor
+	git push origin main --tags
+	git push github main --tags
+
+release-patch: bump-patch
+	git push origin main --tags
+	git push github main --tags
 
 
 setup: setup-dirs setup-build setup-format setup-lint setup-reports setup-bump
