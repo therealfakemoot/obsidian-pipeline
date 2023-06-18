@@ -13,9 +13,9 @@ docker-push:
 docker-image:
 	$(DOCKER_CMD) build --build-arg VERSION=$(VERSION) -t code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION) .
 
-.PHONE: build-alpine
+.PHONY: build-alpine
 build-alpine:
-	CGO_ENABLED=0 go build -a -installsuffix cgo -o $(DISTDIR)/$(NAME)-$(VERSION)-alpine_amd64/obp cmd/obp/cmd/*.go
+	CGO_ENABLED=0 GOOS=linux go build -ldflags="buildmode=exe $(LDFLAGS) -linkmode external -w -extldflags '-static'"  -o $(DISTDIR)/$(NAME)-$(VERSION)-alpine/obp cmd/obp/*.go
 
 # This file is intended as a starting point for a customized makefile for a Go project.
 #
@@ -92,7 +92,7 @@ GOCMD = go
 ARCHES ?= amd64 386
 OSES ?= windows linux darwin
 OUTTPL = $(DISTDIR)/$(NAME)-$(VERSION)-{{.OS}}_{{.Arch}}/{{.Dir}}
-LDFLAGS = -X $(PKG).Version=$(VERSION) -X $(PKG).Build=$(COMMIT_ID)
+LDFLAGS = -X '$(PKG).Version=$(VERSION)' -X '$(PKG).Build=$(COMMIT_ID)'
 GOBUILD = gox -osarch="!darwin/386" -rebuild -gocmd="$(GOCMD)" -arch="$(ARCHES)" -os="$(OSES)" -output="$(OUTTPL)" -tags "$(BUILD_TAGS)" -ldflags "$(LDFLAGS)"
 GOCLEAN = $(GOCMD) clean
 GOINSTALL = $(GOCMD) install -a -tags "$(BUILD_TAGS)" -ldflags "$(LDFLAGS)"
