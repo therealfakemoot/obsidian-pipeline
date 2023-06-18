@@ -113,7 +113,19 @@ INSTALL_TARGETS := $(addprefix install-,$(CMDS))
 
 all: debug setup dep format lint test bench build dist
 
-setup: setup-dirs setup-build setup-format setup-lint setup-reports
+bump-major: setup-bump
+	bump major
+
+bump-minor: setup-bump
+	bump minor
+
+bump-patch: setup-bump
+	bump patch
+
+setup: setup-dirs setup-build setup-format setup-lint setup-reports setup-bump
+
+setup-bump:
+	go install github.com/guilhem/bump@latest
 
 setup-reports: setup-dirs
 	go install github.com/tebeka/go2xunit@latest
