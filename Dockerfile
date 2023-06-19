@@ -21,16 +21,14 @@ FROM alpine:latest AS build-release-stage
 WORKDIR /
 
 ARG VERSION=version
-COPY --from=build-stage /app/dist/*-alpine/obp /bin/obp
+COPY --from=build-stage /app/dist/*-alpine/obp /bin/
 RUN chmod +x /bin/obp
 
 ARG USER=default
 ENV HOME /home/$USER
 
-# install sudo as root
 RUN apk add --update sudo
 
-# add new user
 RUN adduser -D $USER \
         && echo "$USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$USER \
         && chmod 0440 /etc/sudoers.d/$USER
