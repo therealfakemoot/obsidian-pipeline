@@ -34,7 +34,7 @@ var validateCmd = &cobra.Command{
 
 		err := fs.WalkDir(root, ".", func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
-				return err
+				return fmt.Errorf("could not walk %q: %w", path, err)
 			}
 
 			if d.IsDir() {
@@ -61,7 +61,7 @@ var validateCmd = &cobra.Command{
 			return nil
 		})
 
-		return err
+		return fmt.Errorf("validate command failed: %w", err)
 	},
 }
 
