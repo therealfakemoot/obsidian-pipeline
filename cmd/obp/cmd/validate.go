@@ -61,7 +61,7 @@ var validateCmd = &cobra.Command{
 			return nil
 		})
 
-		return fmt.Errorf("validate command failed: %w", err)
+		return nil
 	},
 }
 
