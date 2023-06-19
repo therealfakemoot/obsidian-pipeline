@@ -117,17 +117,15 @@ INSTALL_TARGETS := $(addprefix install-,$(CMDS))
 
 all: debug setup dep format lint test bench build dist
 
-release-major: bump-major
+git-push:
 	git push origin main --tags
 	git push github main --tags
 
-release-minor: bump-minor
-	git push origin main --tags
-	git push github main --tags
+release-major: bump-major git-push
 
-release-patch: bump-patch
-	git push origin main --tags
-	git push github main --tags
+release-minor: bump-minor git-push
+
+release-patch: bump-patch git-push
 
 
 setup: setup-dirs setup-build setup-format setup-lint setup-reports setup-bump

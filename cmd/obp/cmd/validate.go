@@ -45,16 +45,16 @@ var validateCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("error generating absolute path for %q", target)
 			}
-			target, err := os.Open(absPath)
+			file, err := os.Open(absPath)
 			if err != nil {
 				return fmt.Errorf("could not open target file: %w", err)
 			}
-			defer target.Close()
-			err = obp.Validate(schema, target)
+			defer file.Close()
+			err = obp.Validate(schema, file)
 			if err != nil {
 				details, ok := err.(*jsonschema.ValidationError)
 				if !ok {
-					return err
+					return fmt.Errorf("eror validating %q: %w", path, err)
 				}
 				obp.PrettyDetails(cmd.OutOrStdout(), viper.GetString("format"), details.DetailedOutput(), absPath)
 			}
@@ -89,5 +89,4 @@ func init() {
 	if err != nil {
 		log.Panicln("error binding viper to format flag:", err)
 	}
-
 }
