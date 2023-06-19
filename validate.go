@@ -35,7 +35,11 @@ func Validate(schemaURL string, r io.Reader) error {
 		return fmt.Errorf("error compiling schema: %w", err)
 	}
 
-	return fmt.Errorf("frontmatter failed validation: %w", schema.Validate(frontmatter))
+	if err != nil {
+		return fmt.Errorf("frontmatter failed validation: %w", schema.Validate(frontmatter))
+	}
+
+	return nil
 }
 
 func recurseDetails(detailed jsonschema.Detailed, acc map[string]jsonschema.Detailed) map[string]jsonschema.Detailed {
