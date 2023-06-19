@@ -60,7 +60,9 @@ var validateCmd = &cobra.Command{
 			}
 			return nil
 		})
-
+		if err != nil {
+			return fmt.Errorf("walkfunc failed: %w", err)
+		}
 		return nil
 	},
 }
