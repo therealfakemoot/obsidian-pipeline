@@ -4,11 +4,13 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"log"
-	// "fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"code.ndumas.com/ndumas/obsidian-pipeline"
 )
 
 var source, target string
@@ -22,6 +24,23 @@ var hugoCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		target := viper.GetString("target")
+		source := viper.GetString("source")
+
+		err := obp.CopyPosts(target, source)
+		if err != nil {
+			return fmt.Errorf("error copying posts in %q: %w", source, err)
+		}
+
+		err = obp.Sanitize(source)
+		if err != nil {
+			return fmt.Errorf("error sanitizing posts in %q: %w", source, err)
+		}
+
+		err = obp.GatherMedia(source)
+		if err != nil {
+			return fmt.Errorf("error gathering media in %q: %w", source, err)
+		}
 		return nil
 	},
 }

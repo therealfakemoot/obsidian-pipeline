@@ -1,6 +1,6 @@
 package obp
 
-func Copy(src, dst string) error {
+func CopyPosts(src, dst string) error {
 	return nil
 }
 
