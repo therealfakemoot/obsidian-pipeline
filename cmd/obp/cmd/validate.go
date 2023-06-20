@@ -75,7 +75,6 @@ func init() {
 	validateCmd.Flags().StringP("target", "t", "", "directory containing validation targets")
 	validateCmd.MarkFlagsRequiredTogether("schema", "target")
 	validateCmd.PersistentFlags().StringVar(&format, "format", "markdown", "output format [markdown, json, csv]")
-	rootCmd.AddCommand(validateCmd)
 
 	err := viper.BindPFlag("schema", validateCmd.Flags().Lookup("schema"))
 	if err != nil {
@@ -91,4 +90,6 @@ func init() {
 	if err != nil {
 		log.Panicln("error binding viper to format flag:", err)
 	}
+
+	rootCmd.AddCommand(validateCmd)
 }

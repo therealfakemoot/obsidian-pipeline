@@ -4,10 +4,14 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"log"
 	// "fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+var source, target string
 
 var hugoCmd = &cobra.Command{
 	Use:   "hugo",
@@ -23,8 +27,19 @@ var hugoCmd = &cobra.Command{
 }
 
 func init() {
-	// hugoCmd.Flags().StringVar(&source, "source", "", "directory containing ready-to-publish posts")
-	// hugoCmd.Flags().StringVar(&target, "target", "", "target Hugo directory (typically content/posts)")
+	hugoCmd.Flags().StringP("source", "s", "", "path to vault directory containing hugo posts")
+	hugoCmd.Flags().StringP("target", "t", "", "hugo content/ directory")
+	hugoCmd.MarkFlagsRequiredTogether("source", "target")
+
+	err := viper.BindPFlag("source", hugoCmd.Flags().Lookup("schema"))
+	if err != nil {
+		log.Panicln("error binding viper to source flag:", err)
+	}
+
+	err = viper.BindPFlag("target", hugoCmd.Flags().Lookup("target"))
+	if err != nil {
+		log.Panicln("error binding viper to target flag:", err)
+	}
 
 	rootCmd.AddCommand(hugoCmd)
 }
