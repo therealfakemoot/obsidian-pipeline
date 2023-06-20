@@ -1,24 +1,3 @@
-DOCKER_CMD=docker --config ~/.docker/
-
-.PHONY: docker
-docker: docker-image docker-push
-
-.PHONY: docker-push
-docker-push:
-	$(DOCKER_CMD) tag code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION) code.ndumas.com/ndumas/obsidian-pipeline:latest
-	$(DOCKER_CMD) push code.ndumas.com/ndumas/obsidian-pipeline:latest
-	$(DOCKER_CMD) push code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION)
-
-.PHONY: docker-image
-docker-image:
-	$(DOCKER_CMD) build --build-arg VERSION=$(VERSION) -t code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION) .
-
-.PHONY: build-alpine
-build-alpine:
-# this version breaks build variable injection
-# CGO_ENABLED=0 GOOS=linux go build -ldflags="buildmode=exe $(LDFLAGS) -linkmode external -w -extldflags '-static' "  -o $(DISTDIR)/$(NAME)-$(VERSION)-alpine/obp cmd/obp/*.go
-	CGO_ENABLED=0 GOOS=linux go build -ldflags="$(LDFLAGS)"  -o $(DISTDIR)/$(NAME)-$(VERSION)-alpine/obp cmd/obp/*.go
-
 # This file is intended as a starting point for a customized makefile for a Go project.
 #
 # Targets:
@@ -62,7 +41,7 @@ build-alpine:
 
 # Parameters
 PKG = code.ndumas.com/ndumas/obsidian-pipeline
-NAME = obp
+NAME = obsidian-pipeline
 DOC = README.md LICENSE
 
 
@@ -109,6 +88,7 @@ ZIPCMD = zip
 SHACMD = sha256sum
 SLOCCMD = cloc --by-file --xml --exclude-dir="vendor" --include-lang="Go"
 XUCMD = go2xunit
+DOCKER_CMD=docker --config ~/.docker/
 
 # Dynamic Targets
 INSTALL_TARGETS := $(addprefix install-,$(CMDS))
@@ -201,6 +181,27 @@ dist: clean build
 	cd "$(DISTDIR)"; for dir in ./*darwin*; do $(GZCMD) "$(basename "$$dir").tar.gz" "$$dir"; done
 	cd "$(DISTDIR)"; find . -maxdepth 1 -type f -printf "$(SHACMD) %P | tee \"./%P.sha\"\n" | sh
 	$(info "Built v$(VERSION), build $(COMMIT_ID)")
+
+
+.PHONY: docker
+docker: docker-image docker-push
+
+.PHONY: docker-push
+docker-push:
+	$(DOCKER_CMD) tag code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION) code.ndumas.com/ndumas/obsidian-pipeline:latest
+	$(DOCKER_CMD) push code.ndumas.com/ndumas/obsidian-pipeline:latest
+	$(DOCKER_CMD) push code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION)
+
+.PHONY: docker-image
+docker-image:
+	$(DOCKER_CMD) build --build-arg VERSION=$(VERSION) -t code.ndumas.com/ndumas/obsidian-pipeline:$(VERSION) .
+
+.PHONY: build-alpine
+build-alpine:
+# this version breaks build variable injection
+# CGO_ENABLED=0 GOOS=linux go build -ldflags="buildmode=exe $(LDFLAGS) -linkmode external -w -extldflags '-static' "  -o $(DISTDIR)/$(NAME)-$(VERSION)-alpine/obp cmd/obp/*.go
+	CGO_ENABLED=0 GOOS=linux go build -ldflags="$(LDFLAGS)"  -o $(DISTDIR)/$(NAME)-$(VERSION)-alpine/obp cmd/obp/*.go
+
 
 debug:
 	$(info MD=$(MD))
