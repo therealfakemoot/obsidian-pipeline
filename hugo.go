@@ -10,13 +10,6 @@ import (
 )
 
 func CopyPosts(src, dst string) error {
-	/*
-		err := os.MkdirAll(dst, 0777)
-		if err != nil && !os.IsExist(err) {
-			return fmt.Errorf("error creating target directory %q: %w", dst, err)
-		}
-	*/
-
 	posts := make([]string, 0)
 
 	srcRoot := os.DirFS(src)
@@ -39,7 +32,25 @@ func CopyPosts(src, dst string) error {
 	if err != nil {
 		return fmt.Errorf("walkfunc failed: %w", err)
 	}
-	log.Printf("%#+v\n", posts)
+
+	for _, post := range posts {
+		base := filepath.Base(post)
+
+		splitPostName := strings.Split(base, ".")
+
+		postName := strings.Join(splitPostName[:len(splitPostName)-1], ".")
+
+		log.Printf("provided dst: %q\n", dst)
+		postDir := filepath.Join(dst, postName)
+		log.Printf("postDir: %q\n", postDir)
+		return nil
+
+		err := os.MkdirAll(postDir, 0777)
+
+		if err != nil && !os.IsExist(err) {
+			return fmt.Errorf("error creating target directory %q: %w", dst, err)
+		}
+	}
 
 	return nil
 }

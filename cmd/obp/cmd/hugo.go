@@ -13,8 +13,6 @@ import (
 	"code.ndumas.com/ndumas/obsidian-pipeline"
 )
 
-var source, target string
-
 var hugoCmd = &cobra.Command{
 	Use:   "hugo",
 	Short: "convert a set of Obsidian notes into a Hugo compatible directory structure",
@@ -26,6 +24,9 @@ var hugoCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		target := viper.GetString("target")
 		source := viper.GetString("source")
+		log.Printf("provided source: %q\n", source)
+		log.Printf("provided target: %q\n", target)
+		return nil
 
 		err := obp.CopyPosts(source, target)
 		if err != nil {
@@ -47,18 +48,19 @@ var hugoCmd = &cobra.Command{
 
 func init() {
 	hugoCmd.Flags().StringP("source", "s", "", "path to vault directory containing hugo posts")
-	hugoCmd.Flags().StringP("target", "t", "", "hugo content/ directory")
-	hugoCmd.MarkFlagsRequiredTogether("source", "target")
 
 	err := viper.BindPFlag("source", hugoCmd.Flags().Lookup("source"))
 	if err != nil {
 		log.Panicln("error binding viper to source flag:", err)
 	}
 
+	hugoCmd.Flags().StringP("target", "t", "", "hugo content/ directory")
 	err = viper.BindPFlag("target", hugoCmd.Flags().Lookup("target"))
 	if err != nil {
 		log.Panicln("error binding viper to target flag:", err)
 	}
+
+	hugoCmd.MarkFlagsRequiredTogether("source", "target")
 
 	rootCmd.AddCommand(hugoCmd)
 }
