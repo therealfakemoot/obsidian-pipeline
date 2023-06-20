@@ -27,7 +27,7 @@ var hugoCmd = &cobra.Command{
 		target := viper.GetString("target")
 		source := viper.GetString("source")
 
-		err := obp.CopyPosts(target, source)
+		err := obp.CopyPosts(source, target)
 		if err != nil {
 			return fmt.Errorf("error copying posts in %q: %w", source, err)
 		}
@@ -50,7 +50,7 @@ func init() {
 	hugoCmd.Flags().StringP("target", "t", "", "hugo content/ directory")
 	hugoCmd.MarkFlagsRequiredTogether("source", "target")
 
-	err := viper.BindPFlag("source", hugoCmd.Flags().Lookup("schema"))
+	err := viper.BindPFlag("source", hugoCmd.Flags().Lookup("source"))
 	if err != nil {
 		log.Panicln("error binding viper to source flag:", err)
 	}
