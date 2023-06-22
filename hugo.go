@@ -3,7 +3,7 @@ package obp
 import (
 	"fmt"
 	"io/fs"
-	"log"
+	// "log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,10 +40,7 @@ func CopyPosts(src, dst string) error {
 
 		postName := strings.Join(splitPostName[:len(splitPostName)-1], ".")
 
-		log.Printf("provided dst: %q\n", dst)
 		postDir := filepath.Join(dst, postName)
-		log.Printf("postDir: %q\n", postDir)
-		return nil
 
 		err := os.MkdirAll(postDir, 0777)
 

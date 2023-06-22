@@ -25,8 +25,8 @@ var validateCmd = &cobra.Command{
 	Long: `Validate YAML frontmatter with jsonschema
 `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		schema := viper.GetString("schema")
-		target := viper.GetString("target")
+		schema := viper.GetString("validate.schema")
+		target := viper.GetString("validate.target")
 		if target == "" {
 			return fmt.Errorf("target flag must not be empty")
 		}
@@ -81,12 +81,12 @@ func init() {
 		log.Panicln("error binding viper to schema flag:", err)
 	}
 
-	err = viper.BindPFlag("target", validateCmd.Flags().Lookup("target"))
+	err = viper.BindPFlag("validate.target", validateCmd.Flags().Lookup("target"))
 	if err != nil {
 		log.Panicln("error binding viper to target flag:", err)
 	}
 
-	err = viper.BindPFlag("format", validateCmd.PersistentFlags().Lookup("format"))
+	err = viper.BindPFlag("validate.format", validateCmd.PersistentFlags().Lookup("format"))
 	if err != nil {
 		log.Panicln("error binding viper to format flag:", err)
 	}

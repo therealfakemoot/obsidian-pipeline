@@ -22,19 +22,8 @@ var hugoCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cmd.DebugFlags()
-
-		source := viper.GetString("source")
-		log.Printf("viper source: %q\n", source)
-		cobraSource, _ := cmd.Flags().GetString("source")
-		log.Printf("cobra source: %q\n", cobraSource)
-
-		target := viper.GetString("target")
-		log.Printf("viper target: %q\n", target)
-		cobraTarget, _ := cmd.Flags().GetString("target")
-		log.Printf("cobra target: %q\n", cobraTarget)
-
-		return nil
+		source := viper.GetString("hugo.source")
+		target := viper.GetString("hugo.target")
 
 		err := obp.CopyPosts(source, target)
 		if err != nil {
@@ -56,13 +45,13 @@ var hugoCmd = &cobra.Command{
 
 func init() {
 	hugoCmd.Flags().StringP("source", "s", "", "path to vault directory containing hugo posts")
-	err := viper.BindPFlag("source", hugoCmd.Flags().Lookup("source"))
+	err := viper.BindPFlag("hugo.source", hugoCmd.Flags().Lookup("source"))
 	if err != nil {
 		log.Panicln("error binding viper to source flag:", err)
 	}
 
 	hugoCmd.Flags().StringP("target", "t", "", "hugo content/ directory")
-	err = viper.BindPFlag("target", hugoCmd.Flags().Lookup("target"))
+	err = viper.BindPFlag("hugo.target", hugoCmd.Flags().Lookup("target"))
 	if err != nil {
 		log.Panicln("error binding viper to target flag:", err)
 	}
