@@ -2,12 +2,38 @@ package obp
 
 import (
 	"fmt"
+	"io"
 	"io/fs"
 	// "log"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+func copy(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
+}
 
 func CopyPosts(src, dst string) error {
 	posts := make([]string, 0)
@@ -46,6 +72,11 @@ func CopyPosts(src, dst string) error {
 
 		if err != nil && !os.IsExist(err) {
 			return fmt.Errorf("error creating target directory %q: %w", dst, err)
+		}
+
+		_, err = copy(post, filepath.Join(postDir, "index.md"))
+		if err != nil {
+			return fmt.Errorf("error opening %q for copying: %w", post, err)
 		}
 	}
 
