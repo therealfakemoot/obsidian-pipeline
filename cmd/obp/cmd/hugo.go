@@ -22,10 +22,18 @@ var hugoCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		target := viper.GetString("target")
+		cmd.DebugFlags()
+
 		source := viper.GetString("source")
-		log.Printf("provided source: %q\n", source)
-		log.Printf("provided target: %q\n", target)
+		log.Printf("viper source: %q\n", source)
+		cobraSource, _ := cmd.Flags().GetString("source")
+		log.Printf("cobra source: %q\n", cobraSource)
+
+		target := viper.GetString("target")
+		log.Printf("viper target: %q\n", target)
+		cobraTarget, _ := cmd.Flags().GetString("target")
+		log.Printf("cobra target: %q\n", cobraTarget)
+
 		return nil
 
 		err := obp.CopyPosts(source, target)
@@ -48,7 +56,6 @@ var hugoCmd = &cobra.Command{
 
 func init() {
 	hugoCmd.Flags().StringP("source", "s", "", "path to vault directory containing hugo posts")
-
 	err := viper.BindPFlag("source", hugoCmd.Flags().Lookup("source"))
 	if err != nil {
 		log.Panicln("error binding viper to source flag:", err)
